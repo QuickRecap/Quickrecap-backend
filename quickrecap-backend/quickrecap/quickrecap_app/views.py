@@ -1,8 +1,9 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework.exceptions import NotFound
 
 from django.contrib.auth import authenticate
 
@@ -57,6 +58,35 @@ class LogoutView(generics.GenericAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class ChangePasswordView(generics.UpdateAPIView):
+    serializer_class = ChangePasswordSerializer
+
+    def update(self, request, *args, **kwargs):
+        user_id = request.data.get('id')
+        
+        if not user_id:
+            return Response({"id": "El ID del usuario es requerido."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Buscar al usuario por el ID
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise NotFound("Usuario no encontrado.")
+
+        # Validar los datos
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Verificar que la contraseña antigua sea correcta
+        if not user.check_password(serializer.validated_data['old_password']):
+            return Response({"old_password": "La contraseña actual es incorrecta."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Cambiar la contraseña por la nueva
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+
+        return Response({"detail": "Contraseña cambiada exitosamente."}, status=status.HTTP_200_OK)
 
 class ReporteErrorView(generics.CreateAPIView):
     queryset = ReporteError.objects.all()

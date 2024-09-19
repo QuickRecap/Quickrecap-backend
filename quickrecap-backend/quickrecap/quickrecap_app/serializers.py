@@ -10,6 +10,7 @@ from .models import *
 from .serializers import *
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth import password_validation
 from django.utils.translation import gettext_lazy as _
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -62,6 +63,10 @@ class LoginSerializer(serializers.Serializer):
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
     
 #----------- REPORTE ERROR SERIALIZER --------- #
 class ReporteErrorSerializer(serializers.ModelSerializer):
