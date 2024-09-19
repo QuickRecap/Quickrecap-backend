@@ -27,6 +27,7 @@ class LoginView(generics.GenericAPIView):
         
         user_data = {
             'id': user.id,
+            'profile_image': user.profile_image,
             'nombres': user.nombres,
             'apellidos': user.apellidos,
             'celular': user.celular,

@@ -10,6 +10,8 @@ class User(AbstractUser):
     fecha_nacimiento = models.DateField(null=True, blank=True)
     email = models.EmailField(null=True, blank=True, unique=True)
     
+    profile_image = models.CharField(max_length=255, null=True, blank=True)
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['nombres', 'apellidos']
     
