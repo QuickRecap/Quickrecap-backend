@@ -9,29 +9,30 @@ from django.contrib.auth import authenticate
 from .models import *
 from .serializers import *
 
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
+from django.utils.translation import gettext_lazy as _
+
 class RegisterSerializer(serializers.ModelSerializer):
+    print("Serializer")
     class Meta:
         model = User
-        fields = ['username', 'password', 'email', 'nombres', 'apellidos', 'celular', 'genero', 'fecha_nacimiento']
+        fields = ['password', 'email', 'nombres', 'apellidos', 'celular', 'genero']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
+        print("Data: ",validated_data)
         user = User(
-            username=validated_data['username'],
             email=validated_data['email'],
             nombres=validated_data['nombres'],
             apellidos=validated_data['apellidos'],
             celular=validated_data.get('celular', None),
             genero=validated_data.get('genero', None),
-            fecha_nacimiento=validated_data.get('fecha_nacimiento', None),
+            #fecha_nacimiento=validated_data.get('fecha_nacimiento', None),
         )
         user.set_password(validated_data['password'])
         user.save()
         return user
-
-from django.contrib.auth import get_user_model
-from rest_framework import serializers
-from django.utils.translation import gettext_lazy as _
 
 User = get_user_model()
 
