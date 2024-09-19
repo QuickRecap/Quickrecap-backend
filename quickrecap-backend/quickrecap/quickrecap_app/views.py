@@ -56,3 +56,7 @@ class LogoutView(generics.GenericAPIView):
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class ReporteErrorView(generics.CreateAPIView):
+    queryset = ReporteError.objects.all()
+    serializer_class = ReporteErrorSerializer

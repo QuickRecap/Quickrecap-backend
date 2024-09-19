@@ -10,7 +10,6 @@ from .models import *
 from .serializers import *
 
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -63,3 +62,10 @@ class LoginSerializer(serializers.Serializer):
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
+
+#----------- REPORTE ERROR SERIALIZER --------- #
+class ReporteErrorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReporteError
+        fields = ['nombre', 'descripcion']
+
