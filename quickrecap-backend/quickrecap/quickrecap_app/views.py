@@ -89,9 +89,17 @@ class ChangePasswordView(generics.UpdateAPIView):
 
         return Response({"detail": "Contraseña cambiada exitosamente."}, status=status.HTTP_200_OK)
 
-class ReporteErrorView(generics.CreateAPIView):
+class ReportCreateView(generics.CreateAPIView):
     queryset = ReporteError.objects.all()
     serializer_class = ReporteErrorSerializer
+    
+class ReportGetView(generics.ListAPIView):
+    queryset = ReporteError.objects.all()
+    serializer_class = ReportErrorListSerializer    
+
+class UserGetView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 class UserUpdateView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()

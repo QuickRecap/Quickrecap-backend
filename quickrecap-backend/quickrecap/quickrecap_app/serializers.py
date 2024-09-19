@@ -73,6 +73,11 @@ class ReporteErrorSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReporteError
         fields = ['nombre', 'descripcion']
+
+class ReportErrorListSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = ReporteError
+        fields = '__all__'
         
 #----------- USER SERIALIZER --------- #
 class UserSerializer(serializers.ModelSerializer):
