@@ -7,6 +7,7 @@ class User(AbstractUser):
     celular = models.CharField(max_length=15, null=True, blank=True)
     genero = models.CharField(max_length=10, choices=[('M', 'Masculino'), ('F', 'Femenino')], null=True, blank=True)
     fecha_nacimiento = models.DateField(null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
     
     groups = models.ManyToManyField(
         'auth.Group',

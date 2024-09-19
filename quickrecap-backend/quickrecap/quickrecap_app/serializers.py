@@ -28,26 +28,37 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
-    
+
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
+from django.utils.translation import gettext_lazy as _
+
+User = get_user_model()
+
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    email = serializers.EmailField()
+    password = serializers.CharField(style={'input_type': 'password'}, trim_whitespace=False)
 
     def validate(self, data):
-        username = data.get("username")
-        password = data.get("password")
+        email = data.get('email')
+        password = data.get('password')
 
-        if username and password:
-            user = authenticate(username=username, password=password)
-            if user:
-                if user.is_active:
-                    return user
-                else:
-                    raise serializers.ValidationError("Cuenta inactiva.")
-            else:
-                raise serializers.ValidationError("Credenciales incorrectas.")
+        if email and password:
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                raise serializers.ValidationError(_("Invalid login credentials."))
+
+            # Verificar si la contraseña es correcta
+            if not user.check_password(password):
+                raise serializers.ValidationError(_("Invalid login credentials."))
+
+            # Si todo está bien, retornamos el usuario
+            data['user'] = user
         else:
-            raise serializers.ValidationError("Debes proporcionar ambos campos.")
+            raise serializers.ValidationError(_("Must include 'email' and 'password'."))
+
+        return data
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()

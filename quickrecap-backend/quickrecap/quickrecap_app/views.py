@@ -14,7 +14,6 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
-
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
     permission_classes = [AllowAny]
@@ -22,11 +21,23 @@ class LoginView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data
+        user = serializer.validated_data['user']
         refresh = RefreshToken.for_user(user)
+        
+        user_data = {
+            'nombres': user.nombres,
+            'apellidos': user.apellidos,
+            'celular': user.celular,
+            'genero': user.genero,
+            'fecha_nacimiento': user.fecha_nacimiento,
+            'email': user.email,
+            'username': user.username,
+        }
+        
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
+            'user': user_data
         })
 
 class LogoutView(generics.GenericAPIView):
