@@ -62,10 +62,15 @@ class LoginSerializer(serializers.Serializer):
 
 class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
-
+    
 #----------- REPORTE ERROR SERIALIZER --------- #
 class ReporteErrorSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReporteError
         fields = ['nombre', 'descripcion']
-
+        
+#----------- USER SERIALIZER --------- #
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['nombres', 'apellidos', 'celular', 'genero', 'email', 'fecha_nacimiento']

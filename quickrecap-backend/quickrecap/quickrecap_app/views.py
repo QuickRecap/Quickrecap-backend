@@ -25,6 +25,7 @@ class LoginView(generics.GenericAPIView):
         refresh = RefreshToken.for_user(user)
         
         user_data = {
+            'id': user.id,
             'nombres': user.nombres,
             'apellidos': user.apellidos,
             'celular': user.celular,
@@ -60,3 +61,11 @@ class LogoutView(generics.GenericAPIView):
 class ReporteErrorView(generics.CreateAPIView):
     queryset = ReporteError.objects.all()
     serializer_class = ReporteErrorSerializer
+
+class UserUpdateView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        user_id = self.kwargs['pk']
+        return User.objects.get(id=user_id)
