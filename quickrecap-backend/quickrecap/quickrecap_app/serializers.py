@@ -83,4 +83,4 @@ class ReportErrorListSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['nombres', 'apellidos', 'celular', 'genero', 'email', 'fecha_nacimiento', 'profile_image']
+        fields = ['nombres', 'apellidos', 'celular', 'genero', 'fecha_nacimiento', 'profile_image']
