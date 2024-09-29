@@ -84,3 +84,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['nombres', 'apellidos', 'celular', 'genero', 'fecha_nacimiento', 'profile_image']
+        
+#----------- ARCHIVO SERIALIZER --------- #
+class ArchivoSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = Archivo
+        fields = '__all__'

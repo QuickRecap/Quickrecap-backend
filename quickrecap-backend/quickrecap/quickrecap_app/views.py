@@ -10,6 +10,8 @@ from django.contrib.auth import authenticate
 from .serializers import *
 from .models import *
 
+
+# ---------- AUTHENTICATION ---------- #
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
@@ -89,6 +91,7 @@ class ChangePasswordView(generics.UpdateAPIView):
 
         return Response({"detail": "Contraseña cambiada exitosamente."}, status=status.HTTP_200_OK)
 
+# ---------- REPORT ---------- #
 class ReportCreateView(generics.CreateAPIView):
     queryset = ReporteError.objects.all()
     serializer_class = ReporteErrorSerializer
@@ -97,6 +100,7 @@ class ReportGetView(generics.ListAPIView):
     queryset = ReporteError.objects.all()
     serializer_class = ReportErrorListSerializer    
 
+# ---------- USER ---------- #
 class UserGetView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -108,3 +112,16 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         user_id = self.kwargs['pk']
         return User.objects.get(id=user_id)
+
+# ---------- ACTIVITIES ---------- #
+
+# ---------- PREGUNTA ----------- #
+
+# ---------- ARCHIVO ---------- #
+class ArchivoGetByUser(generics.ListAPIView):
+    queryset = Archivo.objects.all()
+    serializer_class = ArchivoSerializer
+    
+    def get_object(self):
+        uer_id = self.kwargs['pk']
+        return super().get_object()
