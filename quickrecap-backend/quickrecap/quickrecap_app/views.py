@@ -125,3 +125,7 @@ class ArchivoGetByUser(generics.ListAPIView):
     def get_object(self):
         uer_id = self.kwargs['pk']
         return super().get_object()
+
+class ArchivoCreateView(generics.ListCreateAPIView):
+    queryset = Archivo.objects.all()
+    serializer_class = ArchivoSerializer
