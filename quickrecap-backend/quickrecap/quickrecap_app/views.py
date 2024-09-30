@@ -118,14 +118,14 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
 # ---------- PREGUNTA ----------- #
 
 # ---------- ARCHIVO ---------- #
-class ArchivoGetByUser(generics.ListAPIView):
-    queryset = Archivo.objects.all()
-    serializer_class = ArchivoSerializer
+class FileGetByUser(generics.ListAPIView):
+    queryset = File.objects.all()
+    serializer_class = FileSerializer
     
     def get_object(self):
         uer_id = self.kwargs['pk']
         return super().get_object()
 
-class ArchivoCreateView(generics.ListCreateAPIView):
-    queryset = Archivo.objects.all()
-    serializer_class = ArchivoSerializer
+class FileCreateView(generics.ListCreateAPIView):
+    queryset = File.objects.all()
+    serializer_class = FileSerializer
