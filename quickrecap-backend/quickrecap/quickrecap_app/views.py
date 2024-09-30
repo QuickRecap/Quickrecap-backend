@@ -10,6 +10,7 @@ from django.contrib.auth import authenticate
 from .serializers import *
 from .models import *
 
+from .pdf_processor import process_pdf_gemini
 
 # ---------- AUTHENTICATION ---------- #
 class RegisterView(generics.CreateAPIView):
@@ -114,6 +115,25 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
         return User.objects.get(id=user_id)
 
 # ---------- ACTIVITIES ---------- #
+class ActivityCreateView(generics.ListCreateAPIView):
+    queryset = Actividad.objects.all()
+    serializer_class = ActivitySerializer  # Reemplaza con tu serializer
+
+    def post(self, request):
+        #serializer = self.get_serializer(data=request.data)
+        #serializer.is_valid(raise_exception=True)
+
+        #actividad = serializer.save()
+        
+        pdf_url = request.data.get('pdf_url')
+
+        # Procesar el PDF y generar preguntas
+        response = process_pdf_gemini(pdf_url)
+
+        # Asociar las preguntas generadas a la actividad
+        # ... (aquí deberás implementar la lógica para asociar las preguntas a la actividad)
+
+        return response
 
 # ---------- PREGUNTA ----------- #
 
