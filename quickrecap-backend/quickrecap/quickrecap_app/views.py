@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -9,8 +11,9 @@ from django.contrib.auth import authenticate
 
 from .serializers import *
 from .models import *
-
-from .pdf_processor import process_pdf_gemini
+from .utils.save_information import *
+from .utils.pdf_processor import *
+from .utils.gemini_api import *
 
 # ---------- AUTHENTICATION ---------- #
 class RegisterView(generics.CreateAPIView):
@@ -120,20 +123,23 @@ class ActivityCreateView(generics.ListCreateAPIView):
     serializer_class = ActivitySerializer  # Reemplaza con tu serializer
 
     def post(self, request):
-        #serializer = self.get_serializer(data=request.data)
-        #serializer.is_valid(raise_exception=True)
-
-        #actividad = serializer.save()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        actividad = serializer.save()
         
+        #Obtener URL del PDF
         pdf_url = request.data.get('pdf_url')
-
-        # Procesar el PDF y generar preguntas
+        
+        #Procesar PDF y convertir a JSON
         response = process_pdf_gemini(pdf_url)
-
-        # Asociar las preguntas generadas a la actividad
-        # ... (aquí deberás implementar la lógica para asociar las preguntas a la actividad)
-
-        return response
+        
+        #Transformar Json a String
+        json_data = response.content
+        
+        #Guardar Informacion en modelos
+        saveInformation(json_data, actividad.id)
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # ---------- PREGUNTA ----------- #
 
@@ -143,7 +149,7 @@ class FileGetByUser(generics.ListAPIView):
     serializer_class = FileSerializer
     
     def get_object(self):
-        uer_id = self.kwargs['pk']
+        user_id = self.kwargs['pk']
         return super().get_object()
 
 class FileCreateView(generics.ListCreateAPIView):

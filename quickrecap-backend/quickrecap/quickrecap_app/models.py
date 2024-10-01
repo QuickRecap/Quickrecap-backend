@@ -46,22 +46,24 @@ class Actividad(models.Model):
         ('Gaps', 'Gaps'),
         ('Quiz', 'Quiz')
     ])
-    actividad_preguntas = models.JSONField()
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    privado = models.BooleanField(default=False)
     tiempo_por_pregunta = models.IntegerField()
     numero_preguntas = models.IntegerField()
     veces_jugado = models.IntegerField(default=0)
-    favorito = models.BooleanField(default=False)
     puntuacion_maxima = models.IntegerField(default=0)
+    favorito = models.BooleanField(default=False)
     completado = models.BooleanField(default=False)
-
+    privado = models.BooleanField(default=False)
+    
 class Pregunta(models.Model):
     id = models.AutoField(primary_key=True)
-    actividad = models.ForeignKey(Actividad, on_delete=models.CASCADE, related_name='preguntas')
+    actividad = models.ForeignKey(Actividad, on_delete=models.CASCADE)
     enunciado = models.TextField()
-    opciones = models.JSONField()
-    respuesta_correcta = models.IntegerField()
+    
+class Opcion(models.Model):
+    pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE)
+    texto = models.CharField(max_length=255)
+    correcta = models.BooleanField(default=False)
 
 class File(models.Model):
     id = models.AutoField(primary_key=True)

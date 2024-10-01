@@ -72,5 +72,3 @@ def process_pdf_gemini(url):
             return JsonResponse({'error': 'JSON inválido'}, status=400)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
-
-    #return JsonResponse({'error': 'Método no permitido'}, status=405)

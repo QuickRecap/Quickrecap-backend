@@ -14,14 +14,12 @@ from django.contrib.auth import password_validation
 from django.utils.translation import gettext_lazy as _
 
 class RegisterSerializer(serializers.ModelSerializer):
-    print("Serializer")
     class Meta:
         model = User
         fields = ['password', 'email', 'nombres', 'apellidos', 'celular', 'genero']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        print("Data: ",validated_data)
         user = User(
             email=validated_data['email'],
             nombres=validated_data['nombres'],

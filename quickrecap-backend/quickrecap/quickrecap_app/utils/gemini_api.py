@@ -1,5 +1,5 @@
 import google.generativeai as genai
-from .config import GOOGLE_API_KEY
+from quickrecap_app.config import GOOGLE_API_KEY
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
