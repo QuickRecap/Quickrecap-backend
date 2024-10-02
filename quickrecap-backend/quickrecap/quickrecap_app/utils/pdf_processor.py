@@ -16,9 +16,9 @@ def pdf_to_text(pdf_path):
     pdf_document.close()
     return text
 
-def process_pdf_gemini(url):
+def process_pdf_gemini(url, categoria):
     #if request.method == 'POST':
-        start_time = time.time()  # Empieza el temporizador
+        start_time = time.time()
         try:
             #data = json.loads(request.body)
             pdf_url = url
@@ -30,7 +30,6 @@ def process_pdf_gemini(url):
             response = requests.get(pdf_url)
             if response.status_code != 200:
                 return JsonResponse({'error': 'No se pudo descargar el archivo PDF'}, status=500)
-            
             
             # Guardar el PDF en un archivo temporal
             temp_pdf_path = 'temp.pdf'

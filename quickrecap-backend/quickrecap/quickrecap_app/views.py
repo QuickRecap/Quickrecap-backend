@@ -131,7 +131,7 @@ class ActivityCreateView(generics.ListCreateAPIView):
         pdf_url = request.data.get('pdf_url')
         
         #Procesar PDF y convertir a JSON
-        response = process_pdf_gemini(pdf_url)
+        response = process_pdf_gemini(pdf_url, actividad.tipo_actividad)
         
         #Transformar Json a String
         json_data = response.content
