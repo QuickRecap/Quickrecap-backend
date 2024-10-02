@@ -39,14 +39,12 @@ class ReporteError(models.Model):
 
 class Actividad(models.Model):
     id = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100)
-    categoria = models.CharField(max_length=10, choices=[
+    tipo_actividad = models.CharField(max_length=10, choices=[
         ('Flashcards', 'Flashcards'),
         ('Linkers', 'Linkers'),
         ('Gaps', 'Gaps'),
         ('Quiz', 'Quiz')
     ])
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     tiempo_por_pregunta = models.IntegerField()
     numero_preguntas = models.IntegerField()
     veces_jugado = models.IntegerField(default=0)
@@ -54,14 +52,17 @@ class Actividad(models.Model):
     favorito = models.BooleanField(default=False)
     completado = models.BooleanField(default=False)
     privado = models.BooleanField(default=False)
-    
-class Pregunta(models.Model):
+    nombre = models.CharField(max_length=100)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+   
+class Enunciado(models.Model):
     id = models.AutoField(primary_key=True)
     actividad = models.ForeignKey(Actividad, on_delete=models.CASCADE)
     enunciado = models.TextField()
     
 class Opcion(models.Model):
-    pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE)
+    id = models.AutoField(primary_key=True)
+    enun_id = models.ForeignKey(Enunciado, on_delete=models.CASCADE)
     texto = models.CharField(max_length=255)
     correcta = models.BooleanField(default=False)
 

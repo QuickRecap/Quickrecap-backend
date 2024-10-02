@@ -137,7 +137,7 @@ class ActivityCreateView(generics.ListCreateAPIView):
         json_data = response.content
         
         #Guardar Informacion en modelos
-        saveInformation(json_data, actividad.id)
+        createFlashcard(json_data, actividad.id)
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

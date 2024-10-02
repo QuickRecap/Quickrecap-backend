@@ -5,7 +5,7 @@ import time
 import json
 
 from django.http import JsonResponse
-from .gemini_api import generate_questions_from_gemini
+from .gemini_api import generate_questions_quiz, generate_questions_flashcard
 
 def pdf_to_text(pdf_path):
     pdf_document = fitz.open(pdf_path)
@@ -44,7 +44,8 @@ def process_pdf_gemini(url):
             pdf_text = pdf_to_text(temp_pdf_path)
 
             # Generar preguntas basadas en el texto
-            questions_string = generate_questions_from_gemini(pdf_text)
+            questions_string = generate_questions_flashcard(pdf_text)
+            #questions_string = generate_questions_from_gemini(pdf_text)
 
             # Eliminar el archivo temporal
             os.remove(temp_pdf_path)
@@ -55,9 +56,6 @@ def process_pdf_gemini(url):
                     questions_string = questions_string.replace('```json', '').replace('```', '').strip()
 
                 questions = json.loads(questions_string)
-
-                if not isinstance(questions, dict) or 'questions' not in questions:
-                    return JsonResponse({'error': 'Formato de respuesta inválido'}, status=500)
 
             except json.JSONDecodeError:
                 return JsonResponse({'error': 'Error al procesar la respuesta de Gemini como JSON'}, status=500)
