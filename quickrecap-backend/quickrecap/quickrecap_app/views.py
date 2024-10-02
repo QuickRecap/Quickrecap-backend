@@ -144,14 +144,14 @@ class ActivityCreateView(generics.ListCreateAPIView):
 # ---------- PREGUNTA ----------- #
 
 # ---------- ARCHIVO ---------- #
-class FileGetByUser(generics.RetrieveAPIView):
-    queryset = File.objects.all()
+class FileGetByUser(generics.ListAPIView):
     serializer_class = FileSerializer
-    
-    def get_object(self):
+
+    def get_queryset(self):
         user_id = self.kwargs['pk']
-        print("userid:",user_id)
-        return File.objects.get(usuario=user_id)
+        print("userid:", user_id)
+        return File.objects.filter(usuario=user_id)
+
 
 class FileCreateView(generics.ListCreateAPIView):
     queryset = File.objects.all()
