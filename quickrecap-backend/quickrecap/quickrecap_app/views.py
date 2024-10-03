@@ -118,16 +118,36 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
         return User.objects.get(id=user_id)
 
 # ---------- ACTIVITIES ---------- #
+def get_flashcards_data(actividad_flashcard_id):
+    flashcards = Enunciado.objects.filter(actividad_id=actividad_flashcard_id)
+    return [
+        {'word': f.enunciado, 'definition': f.opcion_set.get(correcta=True).texto}
+        for f in flashcards
+    ]
+
+def get_quiz_data(actividad_quiz_id):
+    quiz = Actividad.objects.get(id=actividad_quiz_id)
+    preguntas = Enunciado.objects.filter(actividad=quiz)
+    return [
+        {
+            'question': pregunta.enunciado,
+            'alternatives': [opcion.texto for opcion in pregunta.opcion_set.all()],
+            'answer': pregunta.opcion_set.get(correcta=True).texto
+        }
+        for pregunta in preguntas
+    ]
+
+def create_flashcard_activity(pdf_text, id):
+    questions_flashcard = generate_questions_flashcard(pdf_text)
+    createFlashcard(questions_flashcard, id)
+
 class ActivityCreateView(generics.ListCreateAPIView):
     queryset = Actividad.objects.all()
     serializer_class = ActivitySerializer
 
     def post(self, request):
         data = request.data
-        
-        serializer_quiz = self.get_serializer(data=request.data)
-        serializer_quiz.is_valid(raise_exception=True)
-        actividad_quiz = serializer_quiz.save()
+        tipo_actividad = data.get('tipo_actividad').lower()
         
         #Obtener URL del PDF
         pdf_url = request.data.get('pdf_url')
@@ -150,21 +170,27 @@ class ActivityCreateView(generics.ListCreateAPIView):
         serializer_flashcard.is_valid(raise_exception=True)
         actividad_flashcard = serializer_flashcard.save()
         
-        if actividad_quiz.tipo_actividad.lower() == 'flashcard':
-            #Crear Flascard - 5.10seg
-            questions_flashcard = generate_questions_flashcard(pdf_text)
-            createFlashcard(questions_flashcard, actividad_flashcard.id)
+        create_flashcard_activity(pdf_text, actividad_flashcard.id)
+        flashcards_data = get_flashcards_data(actividad_flashcard.id)
+        
+        response_data = {
+            'flashcards': flashcards_data
+        }
+        
+        if tipo_actividad.lower() == 'quiz':
+            # Crear la actividad de quiz
+            serializer_quiz = self.get_serializer(data=request.data)
+            serializer_quiz.is_valid(raise_exception=True)
+            actividad_quiz = serializer_quiz.save()
 
-        elif actividad_quiz.tipo_actividad.lower() == 'quiz':
-            #Crear Flashcard - 5.10seg
-            questions_flashcard = generate_questions_flashcard(pdf_text)
-            createFlashcard(questions_flashcard, actividad_flashcard.id)
-            
-            #Crear Quiz - 5.11seg
+            # Crear Quiz - 5.11seg
             questions_quiz = generate_questions_quiz(pdf_text)
             createQuiz(questions_quiz, actividad_quiz.id)
+            
+            quiz_data = get_quiz_data(actividad_quiz.id)  # Función para obtener los datos del quiz
+            response_data['quiz'] = quiz_data
 
-        return Response(serializer_quiz.data, status=status.HTTP_201_CREATED)
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 # ---------- PREGUNTA ----------- #
 
