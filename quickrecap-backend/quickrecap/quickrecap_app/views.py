@@ -137,8 +137,8 @@ def get_quiz_data(actividad_quiz_id):
         for pregunta in preguntas
     ]
 
-def create_flashcard_activity(pdf_text, id):
-    questions_flashcard = generate_questions_flashcard(pdf_text)
+def create_flashcard_activity(pdf_text, numero_preguntas, id):
+    questions_flashcard = generate_questions_flashcard(pdf_text, numero_preguntas)
     createFlashcard(questions_flashcard, id)
 
 class ActivityCreateView(generics.ListCreateAPIView):
@@ -146,8 +146,11 @@ class ActivityCreateView(generics.ListCreateAPIView):
     serializer_class = ActivitySerializer
 
     def post(self, request):
+        
+        #Inicializar Datos
         data = request.data
         tipo_actividad = data.get('tipo_actividad').lower()
+        numero_preguntas = data.get('numero_preguntas').lower()
         
         #Obtener URL del PDF
         pdf_url = request.data.get('pdf_url')
@@ -166,16 +169,17 @@ class ActivityCreateView(generics.ListCreateAPIView):
             'nombre': data.get('nombre')
         }
         
+        #Serializar los resultados
         serializer_flashcard = self.get_serializer(data=flashcard_activity)
         serializer_flashcard.is_valid(raise_exception=True)
         actividad_flashcard = serializer_flashcard.save()
         
-        create_flashcard_activity(pdf_text, actividad_flashcard.id)
+        #Crear actividad de flashcard
+        create_flashcard_activity(pdf_text, numero_preguntas, actividad_flashcard.id)
         flashcards_data = get_flashcards_data(actividad_flashcard.id)
         
-        response_data = {
-            'flashcards': flashcards_data
-        }
+        #Actualizar response con la informacion de las flashcards
+        response_data = {'flashcards': flashcards_data}
         
         if tipo_actividad.lower() == 'quiz':
             # Crear la actividad de quiz
@@ -184,10 +188,13 @@ class ActivityCreateView(generics.ListCreateAPIView):
             actividad_quiz = serializer_quiz.save()
 
             # Crear Quiz - 5.11seg
-            questions_quiz = generate_questions_quiz(pdf_text)
+            questions_quiz = generate_questions_quiz(pdf_text, numero_preguntas)
             createQuiz(questions_quiz, actividad_quiz.id)
             
-            quiz_data = get_quiz_data(actividad_quiz.id)  # Función para obtener los datos del quiz
+            #Obtener los datos del quiz creado
+            quiz_data = get_quiz_data(actividad_quiz.id)
+            
+            #Actualizar response con la informacion del quiz
             response_data['quiz'] = quiz_data
 
         return Response(response_data, status=status.HTTP_201_CREATED)

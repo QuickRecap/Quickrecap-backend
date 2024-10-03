@@ -4,9 +4,9 @@ from quickrecap_app.config import GOOGLE_API_KEY
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
-def generate_questions_flashcard(text):
+def generate_questions_flashcard(text, numero_preguntas):
     print("Generating Flashcards..")
-    prompt = f"""Utiliza el siguiente texto para generar 5 definiciones (termino + definicion) en el siguiente formato JSON:
+    prompt = f"""Utiliza el siguiente texto para generar {numero_preguntas} definiciones (termino + definicion) en el siguiente formato JSON:
        {{
          "flashcard": [
            {{
@@ -33,9 +33,9 @@ def generate_questions_flashcard(text):
         print("Error al decodificar JSON:", json_response)
         return None
 
-def generate_questions_quiz(text):
+def generate_questions_quiz(text, numero_preguntas):
     print("Generating Quiz..")
-    prompt = f"""Utiliza el siguiente texto para generar 5 preguntas de opción múltiple en el siguiente formato JSON:
+    prompt = f"""Utiliza el siguiente texto para generar {numero_preguntas} preguntas de opción múltiple en el siguiente formato JSON:
        {{
          "questions": [
            {{
