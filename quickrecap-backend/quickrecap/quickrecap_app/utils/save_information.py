@@ -7,7 +7,7 @@ from quickrecap_app.models import *
 def createFlashcard(json_data, actividad_id):
     print("Creating Flashcard..")
     try:
-        data = json.loads(json_data)
+        data = json_data
         actividad = Actividad.objects.get(pk=actividad_id)
         
         print("DATA:", data)
@@ -33,7 +33,7 @@ def createFlashcard(json_data, actividad_id):
 def createQuiz(json_data, actividad_id):
     print("Creating Quiz..")
     try:
-        data = json.loads(json_data)
+        data = json_data
         actividad = Actividad.objects.get(pk=actividad_id)
 
         for question_data in data['questions']:

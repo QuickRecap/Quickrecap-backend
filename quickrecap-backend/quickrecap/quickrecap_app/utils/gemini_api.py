@@ -1,4 +1,5 @@
 import google.generativeai as genai
+import json
 from quickrecap_app.config import GOOGLE_API_KEY
 
 genai.configure(api_key=GOOGLE_API_KEY)
@@ -19,7 +20,18 @@ def generate_questions_flashcard(text):
 
     model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content(prompt)
-    return response.text.strip()  
+    
+    json_response = response.text.strip()
+    
+    if json_response.startswith('```json'):
+        json_response = json_response.replace('```json', '').replace('```', '').strip()
+    
+    try:
+        json_data = json.loads(json_response)
+        return json_data
+    except json.JSONDecodeError:
+        print("Error al decodificar JSON:", json_response)
+        return None
 
 def generate_questions_quiz(text):
     print("Generating Quiz..")
@@ -37,4 +49,15 @@ def generate_questions_quiz(text):
 
     model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content(prompt)
-    return response.text.strip()
+    
+    json_response = response.text.strip()
+    
+    if json_response.startswith('```json'):
+        json_response = json_response.replace('```json', '').replace('```', '').strip()
+    
+    try:
+        json_data = json.loads(json_response)
+        return json_data
+    except json.JSONDecodeError:
+        print("Error al decodificar JSON:", json_response)
+        return None
