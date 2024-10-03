@@ -120,12 +120,14 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
 # ---------- ACTIVITIES ---------- #
 class ActivityCreateView(generics.ListCreateAPIView):
     queryset = Actividad.objects.all()
-    serializer_class = ActivitySerializer  # Reemplaza con tu serializer
+    serializer_class = ActivitySerializer
 
     def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        actividad = serializer.save()
+        data = request.data
+        
+        serializer_quiz = self.get_serializer(data=request.data)
+        serializer_quiz.is_valid(raise_exception=True)
+        actividad_quiz = serializer_quiz.save()
         
         #Obtener URL del PDF
         pdf_url = request.data.get('pdf_url')
@@ -135,21 +137,34 @@ class ActivityCreateView(generics.ListCreateAPIView):
         response_data = json.loads(response.content)
         pdf_text = response_data.get('pdf_text')
         
-        if actividad.tipo_actividad.lower() == 'flashcard':
+        # Crear la primera actividad según el tipo
+        flashcard_activity = {
+            'tipo_actividad': 'Flashcards',
+            'tiempo_por_pregunta': data.get('tiempo_por_pregunta'),
+            'numero_preguntas': data.get('numero_preguntas'),
+            'usuario': data.get('usuario'),
+            'nombre': data.get('nombre')
+        }
+        
+        serializer_flashcard = self.get_serializer(data=flashcard_activity)
+        serializer_flashcard.is_valid(raise_exception=True)
+        actividad_flashcard = serializer_flashcard.save()
+        
+        if actividad_quiz.tipo_actividad.lower() == 'flashcard':
             #Crear Flascard - 5.10seg
             questions_flashcard = generate_questions_flashcard(pdf_text)
-            createFlashcard(questions_flashcard, actividad.id)
+            createFlashcard(questions_flashcard, actividad_flashcard.id)
 
-        elif actividad.tipo_actividad.lower() == 'quiz':
+        elif actividad_quiz.tipo_actividad.lower() == 'quiz':
             #Crear Flashcard - 5.10seg
             questions_flashcard = generate_questions_flashcard(pdf_text)
-            createFlashcard(questions_flashcard, actividad.id)
+            createFlashcard(questions_flashcard, actividad_flashcard.id)
             
             #Crear Quiz - 5.11seg
             questions_quiz = generate_questions_quiz(pdf_text)
-            createQuiz(questions_quiz, actividad.id)
+            createQuiz(questions_quiz, actividad_quiz.id)
 
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer_quiz.data, status=status.HTTP_201_CREATED)
 
 # ---------- PREGUNTA ----------- #
 

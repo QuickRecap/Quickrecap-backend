@@ -10,8 +10,6 @@ def createFlashcard(json_data, actividad_id):
         data = json_data
         actividad = Actividad.objects.get(pk=actividad_id)
         
-        print("DATA:", data)
-        
         for flashcard in data['flashcard']:
             pregunta = Enunciado.objects.create(
                 actividad=actividad,
