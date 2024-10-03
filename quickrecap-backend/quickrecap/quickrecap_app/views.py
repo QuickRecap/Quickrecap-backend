@@ -131,14 +131,24 @@ class ActivityCreateView(generics.ListCreateAPIView):
         pdf_url = request.data.get('pdf_url')
         
         #Procesar PDF y convertir a JSON
-        response = process_pdf_gemini(pdf_url, actividad.tipo_actividad)
+        response = process_pdf_gemini(pdf_url)
+        response_data = json.loads(response.content)
+        pdf_text = response_data.get('pdf_text')
         
-        #Transformar Json a String
-        json_data = response.content
-        
-        #Guardar Informacion en modelos
-        createFlashcard(json_data, actividad.id)
-        
+        if actividad.tipo_actividad.lower() == 'flashcard':
+            #Crear Flascard - 5.10seg
+            questions_flashcard = generate_questions_flashcard(pdf_text)
+            createFlashcard(questions_flashcard, actividad.id)
+
+        elif actividad.tipo_actividad.lower() == 'quiz':
+            #Crear Flashcard - 5.10seg
+            questions_flashcard = generate_questions_flashcard(pdf_text)
+            createFlashcard(questions_flashcard, actividad.id)
+            
+            #Crear Quiz - 5.11seg
+            questions_quiz = generate_questions_quiz(pdf_text)
+            createQuiz(questions_quiz, actividad.id)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 # ---------- PREGUNTA ----------- #

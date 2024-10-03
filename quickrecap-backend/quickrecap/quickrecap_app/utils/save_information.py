@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from quickrecap_app.models import *
 
 def createFlashcard(json_data, actividad_id):
+    print("Creating Flashcard..")
     try:
         data = json.loads(json_data)
         actividad = Actividad.objects.get(pk=actividad_id)
@@ -30,6 +31,7 @@ def createFlashcard(json_data, actividad_id):
     return Response(status=status.HTTP_200_OK)
 
 def createQuiz(json_data, actividad_id):
+    print("Creating Quiz..")
     try:
         data = json.loads(json_data)
         actividad = Actividad.objects.get(pk=actividad_id)
