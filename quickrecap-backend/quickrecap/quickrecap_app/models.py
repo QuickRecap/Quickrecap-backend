@@ -54,6 +54,7 @@ class Actividad(models.Model):
     privado = models.BooleanField(default=False)
     nombre = models.CharField(max_length=100)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    flashcard_id = models.IntegerField(null=True, blank=True)
    
 class Enunciado(models.Model):
     id = models.AutoField(primary_key=True)

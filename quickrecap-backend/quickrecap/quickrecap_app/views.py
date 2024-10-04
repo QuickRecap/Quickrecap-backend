@@ -182,8 +182,14 @@ class ActivityCreateView(generics.ListCreateAPIView):
         response_data = {'flashcards': flashcards_data}
         
         if tipo_actividad.lower() == 'quiz':
+            #Hacer una copia de request.data
+            new_data = request.data.copy()
+            
+            # Añadir el parámetro 'flashcard_id' antes de serializar
+            new_data['flashcard_id'] = actividad_flashcard.id
+            
             # Crear la actividad de quiz
-            serializer_quiz = self.get_serializer(data=request.data)
+            serializer_quiz = self.get_serializer(data=new_data)
             serializer_quiz.is_valid(raise_exception=True)
             actividad_quiz = serializer_quiz.save()
 
