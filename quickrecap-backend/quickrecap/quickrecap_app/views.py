@@ -132,7 +132,7 @@ def get_quiz_data(actividad_quiz_id):
         {
             'question': pregunta.enunciado,
             'alternatives': [opcion.texto for opcion in pregunta.opcion_set.all()],
-            'answer_index': [opcion.texto for opcion in pregunta.opcion_set.all()].index(pregunta.opcion_set.get(correcta=True).texto)
+            'answer': [opcion.texto for opcion in pregunta.opcion_set.all()].index(pregunta.opcion_set.get(correcta=True).texto)
         }
         for pregunta in preguntas
     ]
