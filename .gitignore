@@ -1,2 +1,3 @@
-
-quickrecap-backend/quickrecap/db.sqlite3
+/quickrecap/db.sqlite3
+/quickrecap/quickrecap_app/config.py
+*.pyc
