@@ -149,11 +149,10 @@ class ActivityCreateView(generics.ListCreateAPIView):
         
         #Inicializar Datos
         data = request.data
-        #id_quiz = data.get('id')
-        nombre_actividad = data.get('nombre').lower()
+        nombre_actividad = data.get('nombre')
         tipo_actividad = data.get('tipo_actividad').lower()
-        numero_preguntas = data.get('numero_preguntas').lower()
-        tiempo_pregunta = data.get('tiempo_por_pregunta').lower()
+        numero_preguntas = data.get('numero_preguntas')
+        tiempo_pregunta = data.get('tiempo_por_pregunta')
         
         #Obtener URL del PDF
         pdf_url = request.data.get('pdf_url')
@@ -181,6 +180,8 @@ class ActivityCreateView(generics.ListCreateAPIView):
         create_flashcard_activity(pdf_text, numero_preguntas, actividad_flashcard.id)
         flashcards_data = get_flashcards_data(actividad_flashcard.id)
         
+        id_quiz = actividad_flashcard.id
+        
         #Actualizar response con la informacion de las flashcards
         response_data = {'flashcards': flashcards_data}
         
@@ -203,10 +204,12 @@ class ActivityCreateView(generics.ListCreateAPIView):
             #Obtener los datos del quiz creado
             quiz_data = get_quiz_data(actividad_quiz.id)
             
+            id_quiz = actividad_quiz.id
+            
             #Actualizar response con la informacion del quiz
             response_data['quiz'] = quiz_data
 
-        response_data['activity'] = {'id': actividad_quiz.id, 'nombre': nombre_actividad ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': tiempo_pregunta}
+        response_data['activity'] = {'id': id_quiz, 'nombre': nombre_actividad ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': tiempo_pregunta}
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 # ---------- PREGUNTA ----------- #
