@@ -143,7 +143,7 @@ def create_flashcard_activity(pdf_text, numero_preguntas, id):
 
 class ActivityCreateView(generics.ListCreateAPIView):
     queryset = Actividad.objects.all()
-    serializer_class = ActivitySerializer
+    serializer_class = ActivityCreateSerializer
 
     def post(self, request):
         

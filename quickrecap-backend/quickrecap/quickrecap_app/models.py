@@ -9,6 +9,7 @@ class User(AbstractUser):
     genero = models.CharField(max_length=10, null=True, blank=True)
     fecha_nacimiento = models.DateField(null=True, blank=True)
     email = models.EmailField(null=True, blank=True, unique=True)
+    puntos = models.IntegerField(default=0)
     
     profile_image = models.CharField(max_length=255, null=True, blank=True)
     

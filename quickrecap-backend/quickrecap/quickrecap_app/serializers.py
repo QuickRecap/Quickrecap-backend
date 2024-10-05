@@ -90,7 +90,11 @@ class FileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 #----------- ACTIVIDAD SERIALIZER --------- #
-class ActivitySerializer(serializers.ModelSerializer):
+class ActivityListSerializer(serializers.ModelSerializer):
+    model = Actividad
+    fields = '__all__'
+
+class ActivityCreateSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Actividad
-        fields = '__all__'
+        fields = ['tipo_actividad', 'tiempo_por_pregunta', 'numero_preguntas', 'nombre', 'usuario']
