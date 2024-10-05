@@ -149,6 +149,8 @@ class ActivityCreateView(generics.ListCreateAPIView):
         
         #Inicializar Datos
         data = request.data
+        #id_quiz = data.get('id')
+        nombre_actividad = data.get('nombre').lower()
         tipo_actividad = data.get('tipo_actividad').lower()
         numero_preguntas = data.get('numero_preguntas').lower()
         tiempo_pregunta = data.get('tiempo_por_pregunta').lower()
@@ -204,7 +206,7 @@ class ActivityCreateView(generics.ListCreateAPIView):
             #Actualizar response con la informacion del quiz
             response_data['quiz'] = quiz_data
 
-        response_data['activity'] = {'id': actividad_quiz.id, 'nombre': actividad_quiz.nombre ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': actividad_quiz.tiempo_por_pregunta}
+        response_data['activity'] = {'id': actividad_quiz.id, 'nombre': nombre_actividad ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': tiempo_pregunta}
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 # ---------- PREGUNTA ----------- #
