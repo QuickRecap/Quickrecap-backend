@@ -146,7 +146,6 @@ class ActivityCreateView(generics.ListCreateAPIView):
     serializer_class = ActivityCreateSerializer
 
     def post(self, request):
-        
         #Inicializar Datos
         data = request.data
         nombre_actividad = data.get('nombre')
@@ -212,17 +211,30 @@ class ActivityCreateView(generics.ListCreateAPIView):
         response_data['activity'] = {'id': id_quiz, 'nombre': nombre_actividad ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': tiempo_pregunta}
         return Response(response_data, status=status.HTTP_201_CREATED)
 
+class ActivitySearchByUserView(generics.ListAPIView):
+    serializer_class = ActivityListSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs['pk']
+        return Actividad.objects.filter(usuario=user_id)
+    
+class ActivityUpdateView(generics.RetrieveUpdateAPIView):
+    queryset = Actividad.objects.all()
+    serializer_class = ActivityListSerializer
+
+    def get_object(self):
+        actividad_id = self.kwargs['pk']
+        return Actividad.objects.get(id=actividad_id)
+    
 # ---------- PREGUNTA ----------- #
 
 # ---------- ARCHIVO ---------- #
-class FileGetByUser(generics.ListAPIView):
+class FileGetByUserView(generics.ListAPIView):
     serializer_class = FileSerializer
 
     def get_queryset(self):
         user_id = self.kwargs['pk']
-        print("userid:", user_id)
         return File.objects.filter(usuario=user_id)
-
 
 class FileCreateView(generics.ListCreateAPIView):
     queryset = File.objects.all()

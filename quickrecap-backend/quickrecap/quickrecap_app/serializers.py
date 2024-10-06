@@ -91,8 +91,9 @@ class FileSerializer(serializers.ModelSerializer):
 
 #----------- ACTIVIDAD SERIALIZER --------- #
 class ActivityListSerializer(serializers.ModelSerializer):
-    model = Actividad
-    fields = '__all__'
+    class Meta:
+        model = Actividad
+        fields = '__all__'
 
 class ActivityCreateSerializer(serializers.ModelSerializer):
     class Meta: 
