@@ -15,6 +15,7 @@ urlpatterns = [
     
     path('file/search/<int:pk>', FileGetByUserView.as_view(), name='archivo-search'),
     path('file/create', FileCreateView.as_view(), name='archivo-create'),
+    path('file/delete/<int:pk>', FileDeleteView.as_view(), name='archivo-delete'),
     
     path('activity/search/<int:pk>', ActivitySearchByUserView.as_view(), name='activity-search'),
     path('activity/create', ActivityCreateView.as_view(), name='activity-create'),

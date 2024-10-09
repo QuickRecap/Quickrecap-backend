@@ -239,3 +239,7 @@ class FileGetByUserView(generics.ListAPIView):
 class FileCreateView(generics.ListCreateAPIView):
     queryset = File.objects.all()
     serializer_class = FileSerializer
+    
+class FileDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = File.objects.all()
+    serializer_class = FileSerializer
