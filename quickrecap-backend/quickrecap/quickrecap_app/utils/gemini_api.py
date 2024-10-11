@@ -27,7 +27,7 @@ def generate_questions_flashcard(text, numero_preguntas):
         json_response = json_response.replace('```json', '').replace('```', '').strip()
     
     try:
-        json_data = json.loads(json_response)
+        json_data = json.loads(json_response, strict=False)
         return json_data
     except json.JSONDecodeError:
         print("Error al decodificar JSON:", json_response)
@@ -56,7 +56,7 @@ def generate_questions_quiz(text, numero_preguntas):
         json_response = json_response.replace('```json', '').replace('```', '').strip()
     
     try:
-        json_data = json.loads(json_response)
+        json_data = json.loads(json_response, strict=False)
         return json_data
     except json.JSONDecodeError:
         print("Error al decodificar JSON:", json_response)

@@ -8,6 +8,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.exceptions import NotFound
 
 from django.contrib.auth import authenticate
+from django.db.models import Q
 
 from .serializers import *
 from .models import *
@@ -216,7 +217,19 @@ class ActivitySearchByUserView(generics.ListAPIView):
 
     def get_queryset(self):
         user_id = self.kwargs['pk']
-        return Actividad.objects.filter(usuario=user_id)
+        queryset = Actividad.objects.filter(usuario=user_id)
+
+        favorito = self.request.query_params.get('favorito', None)
+        search = self.request.query_params.get('search', None)
+
+        if favorito is not None:
+            favorito_bool = favorito.lower() == 'true'
+            queryset = queryset.filter(favorito=favorito_bool)
+        
+        if search is not None:
+            queryset = queryset.filter(Q(nombre__icontains=search))
+
+        return queryset
     
 class ActivityUpdateView(generics.RetrieveUpdateAPIView):
     queryset = Actividad.objects.all()
@@ -225,6 +238,30 @@ class ActivityUpdateView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         actividad_id = self.kwargs['pk']
         return Actividad.objects.get(id=actividad_id)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+            
+        return Response(serializer.data)
+
+class ActivityDeleteView(generics.DestroyAPIView):
+    queryset = Actividad.objects.all()
+    serializer_class = ActivityListSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response({"message": "Actividad eliminada correctamente"}, status=status.HTTP_204_NO_CONTENT)
+        except Actividad.DoesNotExist:
+            return Response({"error": "Actividad no encontrada"}, status=status.HTTP_404_NOT_FOUND)
     
 # ---------- PREGUNTA ----------- #
 
