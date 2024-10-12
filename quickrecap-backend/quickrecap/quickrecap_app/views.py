@@ -185,13 +185,17 @@ class ActivityCreateView(generics.ListCreateAPIView):
             'tiempo_por_pregunta': data.get('tiempo_por_pregunta'),
             'numero_preguntas': data.get('numero_preguntas'),
             'usuario': data.get('usuario'),
-            'nombre': data.get('nombre')
+            'nombre': data.get('nombre'),
         }
         
         #Serializar los resultados
         serializer_flashcard = self.get_serializer(data=flashcard_activity)
         serializer_flashcard.is_valid(raise_exception=True)
         actividad_flashcard = serializer_flashcard.save()
+        
+        # Update flashcard_id for Flashcard activity
+        actividad_flashcard.flashcard_id = actividad_flashcard.id
+        actividad_flashcard.save()
         
         #Crear actividad de flashcard
         create_flashcard_activity(pdf_text, numero_preguntas, actividad_flashcard.id)
@@ -208,11 +212,13 @@ class ActivityCreateView(generics.ListCreateAPIView):
             
             # Añadir el parámetro 'flashcard_id' antes de serializar
             new_data['flashcard_id'] = actividad_flashcard.id
-            
+            actividad_flashcard.flashcard_id = None
+
             # Crear la actividad de quiz
             serializer_quiz = self.get_serializer(data=new_data)
             serializer_quiz.is_valid(raise_exception=True)
             actividad_quiz = serializer_quiz.save()
+            actividad_flashcard.save()
 
             # Crear Quiz - 5.11seg
             questions_quiz = generate_questions_quiz(pdf_text, numero_preguntas)
@@ -220,7 +226,6 @@ class ActivityCreateView(generics.ListCreateAPIView):
             
             #Obtener los datos del quiz creado
             quiz_data = get_quiz_data(actividad_quiz.id)
-            
             id_quiz = actividad_quiz.id
             
             #Actualizar response con la informacion del quiz
@@ -234,7 +239,7 @@ class ActivitySearchByUserView(generics.ListAPIView):
 
     def get_queryset(self):
         user_id = self.kwargs['pk']
-        queryset = Actividad.objects.filter(usuario=user_id)
+        queryset = Actividad.objects.filter(usuario=user_id, flashcard_id__isnull=False)
 
         favorito = self.request.query_params.get('favorito', None)
         search = self.request.query_params.get('search', None)
