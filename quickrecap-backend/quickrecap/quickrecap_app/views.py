@@ -261,8 +261,11 @@ class ActivitySearchByUserView(generics.ListAPIView):
             queryset = queryset.filter(Q(nombre__icontains=search))
         
         if tipo is not None:
-            print("tipo", tipo)
-            queryset = queryset.filter(tipo_actividad=tipo)
+            if tipo == 'Todos':
+                queryset = queryset
+                return queryset
+            else:
+                queryset = queryset.filter(tipo_actividad=tipo)
 
         return queryset
     
