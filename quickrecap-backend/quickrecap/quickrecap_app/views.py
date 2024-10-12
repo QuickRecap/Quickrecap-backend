@@ -8,7 +8,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.exceptions import NotFound
 
 from django.contrib.auth import authenticate
-from django.db.models import Q
+from django.db.models import Q, F
 
 from .serializers import *
 from .models import *
@@ -112,11 +112,28 @@ class UserGetView(generics.ListAPIView):
 
 class UserUpdateView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserUpdateSerializer
 
     def get_object(self):
         user_id = self.kwargs['pk']
         return User.objects.get(id=user_id)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        if 'puntos' in request.data:
+            new_points = request.data['puntos']
+            instance.puntos = F('puntos') + new_points
+            instance.save()
+            instance.refresh_from_db()
+            serializer.data['puntos'] = instance.puntos
+        else:
+            self.perform_update(serializer)
+
+        return Response(serializer.data)
 
 # ---------- ACTIVITIES ---------- #
 def get_flashcards_data(actividad_flashcard_id):
