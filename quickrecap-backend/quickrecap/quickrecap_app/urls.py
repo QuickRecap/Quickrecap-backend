@@ -12,6 +12,7 @@ urlpatterns = [
     
     path('user/list', UserGetView.as_view(), name='user-list'),
     path('user/update/<int:pk>', UserUpdateView.as_view(), name='edit-user'),
+    path('user/addpoints/<int:pk>', UserUpdatePointsView.as_view(), name='user-points'),
     
     path('file/search/<int:pk>', FileGetByUserView.as_view(), name='archivo-search'),
     path('file/create', FileCreateView.as_view(), name='archivo-create'),

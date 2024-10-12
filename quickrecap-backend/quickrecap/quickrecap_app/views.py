@@ -119,6 +119,14 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
         user_id = self.kwargs['pk']
         return User.objects.get(id=user_id)
 
+class UserUpdatePointsView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserUpdatePointsSerializer
+    
+    def get_object(self):
+        user_id = self.kwargs['pk']
+        return User.objects.get(id=user_id)
+    
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -133,7 +141,6 @@ class UserUpdateView(generics.RetrieveUpdateAPIView):
             serializer.data['puntos'] = instance.puntos
         else:
             self.perform_update(serializer)
-
         return Response(serializer.data)
 
 # ---------- ACTIVITIES ---------- #
@@ -244,6 +251,7 @@ class ActivitySearchByUserView(generics.ListAPIView):
 
         favorito = self.request.query_params.get('favorito', None)
         search = self.request.query_params.get('search', None)
+        tipo = self.request.query_params.get('tipo', None)
 
         if favorito is not None:
             favorito_bool = favorito.lower() == 'true'
@@ -251,6 +259,10 @@ class ActivitySearchByUserView(generics.ListAPIView):
         
         if search is not None:
             queryset = queryset.filter(Q(nombre__icontains=search))
+        
+        if tipo is not None:
+            print("tipo", tipo)
+            queryset = queryset.filter(tipo_actividad=tipo)
 
         return queryset
     

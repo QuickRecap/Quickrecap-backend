@@ -86,8 +86,13 @@ class UserSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = fields = ['nombres', 'apellidos', 'celular', 'genero', 'fecha_nacimiento', 'profile_image', 'puntos']
-        
+        fields = ['nombres', 'apellidos', 'celular', 'genero', 'fecha_nacimiento', 'profile_image', 'puntos']
+
+class UserUpdatePointsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['puntos']
+
 #----------- FILE SERIALIZER --------- #
 class FileSerializer(serializers.ModelSerializer):
     class Meta: 
