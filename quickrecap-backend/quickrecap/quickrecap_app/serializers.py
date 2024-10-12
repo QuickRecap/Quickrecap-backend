@@ -99,3 +99,9 @@ class ActivityCreateSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Actividad
         fields = ['tipo_actividad', 'tiempo_por_pregunta', 'numero_preguntas', 'nombre', 'usuario']
+
+#----------- COMMENTS SERIALIZER --------- #
+class CommentsListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = '__all__'

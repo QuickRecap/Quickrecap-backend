@@ -56,7 +56,13 @@ class Actividad(models.Model):
     nombre = models.CharField(max_length=100)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     flashcard_id = models.IntegerField(null=True, blank=True)
-   
+
+class Comments(models.Model):
+    id = models.AutoField(primary_key=True)
+    actividad_id = models.ForeignKey(Actividad, on_delete=models.CASCADE)
+    comentario = models.TextField()
+    calificacion = models.IntegerField()
+
 class Enunciado(models.Model):
     id = models.AutoField(primary_key=True)
     actividad = models.ForeignKey(Actividad, on_delete=models.CASCADE)

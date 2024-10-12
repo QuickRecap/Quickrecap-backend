@@ -280,3 +280,8 @@ class FileCreateView(generics.ListCreateAPIView):
 class FileDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = File.objects.all()
     serializer_class = FileSerializer
+    
+# ---------- COMMENTS ---------- #
+class CommentsCreateView(generics.ListCreateAPIView):
+    queryset = Comments.objects.all()
+    serializer_class = CommentsListSerializer
