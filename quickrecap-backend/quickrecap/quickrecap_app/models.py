@@ -60,6 +60,7 @@ class Actividad(models.Model):
 class Comments(models.Model):
     id = models.AutoField(primary_key=True)
     actividad_id = models.ForeignKey(Actividad, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     comentario = models.TextField(null=True, blank=True)
     calificacion = models.IntegerField()
 
