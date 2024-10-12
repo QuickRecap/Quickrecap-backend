@@ -1,5 +1,6 @@
 import json
 
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -303,7 +304,36 @@ class FileDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = File.objects.all()
     serializer_class = FileSerializer
     
-# ---------- COMMENTS ---------- #
 class CommentsCreateView(generics.ListCreateAPIView):
     queryset = Comments.objects.all()
     serializer_class = CommentsListSerializer
+
+    def create(self, request):
+        # Obtener el actividad_id del body de la solicitud
+        actividad_id = request.data.get('actividad_id')
+
+        # Verificar si la actividad existe
+        actividad = get_object_or_404(Actividad, id=actividad_id)
+
+        # Verificar si la actividad ya ha sido calificada
+        if actividad.rated:
+            return Response(
+                {"error": "Esta actividad ya ha sido calificada."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Crear el comentario
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        # Actualizar el campo rated de la actividad
+        actividad.rated = True
+        actividad.save()
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, 
+            status=status.HTTP_201_CREATED, 
+            headers=headers
+        )

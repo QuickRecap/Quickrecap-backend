@@ -53,6 +53,7 @@ class Actividad(models.Model):
     favorito = models.BooleanField(default=False)
     completado = models.BooleanField(default=False)
     privado = models.BooleanField(default=False)
+    rated = models.BooleanField(default=False)
     nombre = models.CharField(max_length=100)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     flashcard_id = models.IntegerField(null=True, blank=True)
