@@ -163,6 +163,25 @@ def get_quiz_data(actividad_quiz_id):
         for pregunta in preguntas
     ]
 
+def get_gaps_data(actividad_gaps_id):
+    actividad = Actividad.objects.get(id=actividad_gaps_id)
+    gap_enunciados = GapEnunciado.objects.filter(actividad=actividad)
+    
+    return [
+        {
+            'texto_completo': gap_enunciado.texto_completo,
+            'texto_con_huecos': gap_enunciado.texto_con_huecos,
+            'respuestas': [
+                {
+                    'posicion': respuesta.posicion,
+                    'opciones_correctas': respuesta.opciones_correctas.split(',')
+                }
+                for respuesta in gap_enunciado.gaprespuesta_set.all().order_by('posicion')
+            ]
+        }
+        for gap_enunciado in gap_enunciados
+    ]
+    
 def create_flashcard_activity(pdf_text, numero_preguntas, id):
     questions_flashcard = generate_questions_flashcard(pdf_text, numero_preguntas)
     createFlashcard(questions_flashcard, id)
@@ -238,7 +257,32 @@ class ActivityCreateView(generics.ListCreateAPIView):
             
             #Actualizar response con la informacion del quiz
             response_data['quiz'] = quiz_data
-
+        
+        if tipo_actividad.lower() == 'gaps':
+            #Hacer una copia de request.data
+            new_data = request.data.copy()
+            
+            # Añadir el parámetro 'flashcard_id' antes de serializar
+            new_data['flashcard_id'] = actividad_flashcard.id
+            actividad_flashcard.flashcard_id = None
+            
+            # Crear la actividad de gaps
+            serializer_gaps = self.get_serializer(data=new_data)
+            serializer_gaps.is_valid(raise_exception=True)
+            actividad_gaps = serializer_gaps.save()
+            actividad_gaps.save()
+            
+            # Crear Gaps - #seg
+            questions_quiz = generate_questions_gaps(pdf_text, numero_preguntas)
+            createGaps(questions_quiz, actividad_gaps.id)
+            
+            #Obtener los datos del quiz creado
+            quiz_data = get_gaps_data(actividad_gaps.id)
+            id_quiz = actividad_gaps.id
+            
+            #Actualizar response con la informacion del quiz
+            response_data['gaps'] = quiz_data
+        
         response_data['activity'] = {'id': id_quiz, 'nombre': nombre_actividad ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': tiempo_pregunta}
         return Response(response_data, status=status.HTTP_201_CREATED)
 

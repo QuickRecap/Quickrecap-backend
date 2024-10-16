@@ -75,6 +75,19 @@ class Opcion(models.Model):
     enun_id = models.ForeignKey(Enunciado, on_delete=models.CASCADE)
     texto = models.CharField(max_length=255)
     correcta = models.BooleanField(default=False)
+    
+# -------------- GAPS ACTIVITY -------------- #
+class GapEnunciado(models.Model):
+    id = models.AutoField(primary_key=True)
+    actividad = models.ForeignKey(Actividad, on_delete=models.CASCADE)
+    texto_completo = models.TextField()
+    texto_con_huecos = models.TextField()
+
+class GapRespuesta(models.Model):
+    id = models.AutoField(primary_key=True)
+    gap_enunciado = models.ForeignKey(GapEnunciado, on_delete=models.CASCADE)
+    opciones_correctas = models.TextField()
+    posicion = models.IntegerField()
 
 class File(models.Model):
     id = models.AutoField(primary_key=True)

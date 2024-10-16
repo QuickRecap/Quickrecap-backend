@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from quickrecap_app.models import *
 
+#-------------- FLASHCARD --------------#
 def createFlashcard(json_data, actividad_id):
     print("Creating Flashcard..")
     try:
@@ -28,6 +29,7 @@ def createFlashcard(json_data, actividad_id):
     
     return Response(status=status.HTTP_200_OK)
 
+#-------------- QUIZ --------------#
 def createQuiz(json_data, actividad_id):
     print("Creating Quiz..")
     try:
@@ -44,5 +46,32 @@ def createQuiz(json_data, actividad_id):
     except (json.JSONDecodeError, Exception) as e:
         print(f"Error al guardar la información: {e}")
         raise Exception("Error al procesar las preguntas")
+
+    return Response(status=status.HTTP_200_OK)
+
+#-------------- GAPS --------------#
+def createGaps(json_data, actividad_id):
+    print("Creating Gaps...")
+    try:
+        data = json_data
+        actividad = Actividad.objects.get(pk=actividad_id)
+
+        for gap_data in data['gaps']:
+            gap_enunciado = GapEnunciado.objects.create(
+                actividad=actividad,
+                texto_completo=gap_data['texto_completo'],
+                texto_con_huecos=gap_data['texto_con_huecos']
+            )
+
+            for respuesta_data in gap_data['respuestas']:
+                GapRespuesta.objects.create(
+                    gap_enunciado=gap_enunciado,
+                    posicion=respuesta_data['posicion'],
+                    opciones_correctas=','.join(respuesta_data['opciones_correctas'])
+                )
+
+    except Exception as e:
+        print(f"Error al guardar la información: {e}")
+        raise Exception("Error al procesar las oraciones con huecos")
 
     return Response(status=status.HTTP_200_OK)
