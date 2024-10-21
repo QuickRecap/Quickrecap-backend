@@ -287,8 +287,19 @@ class ActivityCreateView(generics.ListCreateAPIView):
         if tipo_actividad.lower() == 'linkers':
             #Hacer una copia de request.data
             new_data = request.data.copy()
-         
-         
+                  
+            # Añadir el parámetro 'flashcard_id' antes de serializar
+            new_data['flashcard_id'] = actividad_flashcard.id
+            actividad_flashcard.flashcard_id = None
+            
+            # Crear la actividad de gaps
+            serializer_gaps = self.get_serializer(data=new_data)
+            serializer_gaps.is_valid(raise_exception=True)
+            actividad_gaps = serializer_gaps.save()
+            actividad_gaps.save()
+
+            #Actualizar response con la informacion del quiz
+            response_data['linkers'] = flashcards_data
         
         response_data['activity'] = {'id': id_quiz, 'nombre': nombre_actividad ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': tiempo_pregunta}
         return Response(response_data, status=status.HTTP_201_CREATED)
