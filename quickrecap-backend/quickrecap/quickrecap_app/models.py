@@ -82,6 +82,7 @@ class GapEnunciado(models.Model):
     actividad = models.ForeignKey(Actividad, on_delete=models.CASCADE)
     texto_completo = models.TextField()
     texto_con_huecos = models.TextField()
+    alternativas_incorrectas = models.TextField()
 
 class GapRespuesta(models.Model):
     id = models.AutoField(primary_key=True)

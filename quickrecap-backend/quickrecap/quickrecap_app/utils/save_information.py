@@ -60,16 +60,17 @@ def createGaps(json_data, actividad_id):
             gap_enunciado = GapEnunciado.objects.create(
                 actividad=actividad,
                 texto_completo=gap_data['texto_completo'],
-                texto_con_huecos=gap_data['texto_con_huecos']
+                texto_con_huecos=gap_data['texto_con_huecos'],
+                alternativas_incorrectas=json.dumps(gap_data['incorrectas'])
             )
 
             for respuesta_data in gap_data['respuestas']:
-                GapRespuesta.objects.create(
+                gap_respuesta = GapRespuesta.objects.create(
                     gap_enunciado=gap_enunciado,
                     posicion=respuesta_data['posicion'],
                     opciones_correctas=','.join(respuesta_data['opciones_correctas'])
                 )
-
+                
     except Exception as e:
         print(f"Error al guardar la información: {e}")
         raise Exception("Error al procesar las oraciones con huecos")

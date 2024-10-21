@@ -171,6 +171,7 @@ def get_gaps_data(actividad_gaps_id):
         {
             'texto_completo': gap_enunciado.texto_completo,
             'texto_con_huecos': gap_enunciado.texto_con_huecos,
+            'incorrectas': json.loads(gap_enunciado.alternativas_incorrectas),
             'respuestas': [
                 {
                     'posicion': respuesta.posicion,
@@ -282,6 +283,12 @@ class ActivityCreateView(generics.ListCreateAPIView):
             
             #Actualizar response con la informacion del quiz
             response_data['gaps'] = quiz_data
+        
+        if tipo_actividad.lower() == 'linkers':
+            #Hacer una copia de request.data
+            new_data = request.data.copy()
+         
+         
         
         response_data['activity'] = {'id': id_quiz, 'nombre': nombre_actividad ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': tiempo_pregunta}
         return Response(response_data, status=status.HTTP_201_CREATED)

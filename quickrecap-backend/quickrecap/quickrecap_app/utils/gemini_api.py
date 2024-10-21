@@ -83,9 +83,10 @@ Formato JSON requerido:
     {{
       "texto_completo": "Oracion completa aqui",
       "texto_con_huecos": "Oracion con huecos (&)",
+      "incorrectas": ["incorrecta1", "incorrecta2"]
       "respuestas": [
         {{
-          "opciones_correctas": ["alternativa"],
+          "opciones_correctas": ["alternativa"]
           "posicion": 0
         }},
         {{
