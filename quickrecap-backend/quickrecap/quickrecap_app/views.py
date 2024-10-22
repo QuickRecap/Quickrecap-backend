@@ -297,12 +297,19 @@ class ActivityCreateView(generics.ListCreateAPIView):
             serializer_gaps.is_valid(raise_exception=True)
             actividad_gaps = serializer_gaps.save()
             actividad_gaps.save()
+            
+            #Guardado de actividad
+            #--------- Logica para guardar la actividad ---------
 
             #Actualizar response con la informacion del quiz
             response_data['linkers'] = flashcards_data
         
         response_data['activity'] = {'id': id_quiz, 'nombre': nombre_actividad ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': tiempo_pregunta}
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+# -------- Crear Endpoint para retornar por tipo de actividad y por ID de actividad
+#backend-quickrecap.com/activity/search?id=90
+#backend-quickrecap.com/activity/search?tipo=Linkers
 
 class ActivitySearchByUserView(generics.ListAPIView):
     serializer_class = ActivityListSerializer
@@ -362,9 +369,38 @@ class ActivityDeleteView(generics.DestroyAPIView):
             return Response({"message": "Actividad eliminada correctamente"}, status=status.HTTP_204_NO_CONTENT)
         except Actividad.DoesNotExist:
             return Response({"error": "Actividad no encontrada"}, status=status.HTTP_404_NOT_FOUND)
-    
-# ---------- PREGUNTA ----------- #
 
+# ---------- FAVORITOS ---------- #
+class FavoritoListView(generics.ListAPIView):
+    serializer_class = FavoritoListSerializer
+
+    def get_queryset(self):
+        queryset = Favoritos.objects.all()
+
+        user_id = self.request.query_params.get('user', None)
+        tipo = self.request.query_params.get('tipo', None)
+
+        if user_id is not None:
+            queryset = queryset.filter(user=user_id)
+        
+        if tipo is not None:
+            if tipo == 'Todos':
+                queryset = queryset
+                return queryset
+            else:
+                queryset = queryset.filter(activity__tipo_actividad=tipo)
+
+        return queryset
+
+class FavoritoCreateView(generics.ListCreateAPIView):
+    queryset = Favoritos.objects.all()
+    serializer_class = FavoritoListSerializer
+
+# ---------- RATED ---------- #
+class RatedCreateView(generics.ListCreateAPIView):
+    queryset = Rated.objects.all()
+    serializer_class = RatedListSerializer
+    
 # ---------- ARCHIVO ---------- #
 class FileGetByUserView(generics.ListAPIView):
     serializer_class = FileSerializer
@@ -380,37 +416,3 @@ class FileCreateView(generics.ListCreateAPIView):
 class FileDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = File.objects.all()
     serializer_class = FileSerializer
-    
-class CommentsCreateView(generics.ListCreateAPIView):
-    queryset = Comments.objects.all()
-    serializer_class = CommentsListSerializer
-
-    def create(self, request):
-        # Obtener el actividad_id del body de la solicitud
-        actividad_id = request.data.get('actividad_id')
-
-        # Verificar si la actividad existe
-        actividad = get_object_or_404(Actividad, id=actividad_id)
-
-        # Verificar si la actividad ya ha sido calificada
-        if actividad.rated:
-            return Response(
-                {"error": "Esta actividad ya ha sido calificada."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Crear el comentario
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-
-        # Actualizar el campo rated de la actividad
-        actividad.rated = True
-        actividad.save()
-
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, 
-            status=status.HTTP_201_CREATED, 
-            headers=headers
-        )

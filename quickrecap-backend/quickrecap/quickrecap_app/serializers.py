@@ -110,8 +110,14 @@ class ActivityCreateSerializer(serializers.ModelSerializer):
         model = Actividad
         fields = ['tipo_actividad', 'tiempo_por_pregunta', 'numero_preguntas', 'nombre', 'usuario', 'flashcard_id']
 
-#----------- COMMENTS SERIALIZER --------- #
-class CommentsListSerializer(serializers.ModelSerializer):
+#----------- FAVORITOS SERIALIZER --------- #
+class FavoritoListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comments
+        model = Favoritos
+        fields = '__all__'
+        
+#----------- RATED SERIALIZER --------- #
+class RatedListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rated
         fields = '__all__'
