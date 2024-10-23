@@ -272,6 +272,7 @@ class ActivityCreateView(generics.ListCreateAPIView):
             serializer_gaps.is_valid(raise_exception=True)
             actividad_gaps = serializer_gaps.save()
             actividad_gaps.save()
+            actividad_flashcard.save()
             
             # Crear Gaps - #seg
             questions_quiz = generate_questions_gaps(pdf_text, numero_preguntas)
@@ -297,6 +298,7 @@ class ActivityCreateView(generics.ListCreateAPIView):
             serializer_gaps.is_valid(raise_exception=True)
             actividad_gaps = serializer_gaps.save()
             actividad_gaps.save()
+            actividad_flashcard.save()
             
             #Guardado de actividad
             #--------- Logica para guardar la actividad ---------
