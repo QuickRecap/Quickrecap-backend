@@ -235,6 +235,9 @@ class ActivityCreateView(generics.ListCreateAPIView):
         #Obtener URL del PDF
         pdf_url = request.data.get('pdf_url')
         
+        #Actualizar numero de preguntas dependiendo de la actividad        
+        numero_preguntas = int(numero_preguntas) * 3 if tipo_actividad == 'linkers' else int(numero_preguntas)
+        
         #Procesar PDF y convertir a JSON
         response = process_pdf_gemini(pdf_url)
         response_data = json.loads(response.content)
@@ -257,7 +260,7 @@ class ActivityCreateView(generics.ListCreateAPIView):
         # Update flashcard_id for Flashcard activity
         actividad_flashcard.flashcard_id = actividad_flashcard.id
         actividad_flashcard.save()
-        
+            
         #Crear actividad de flashcard
         create_flashcard_activity(pdf_text, numero_preguntas, actividad_flashcard.id)
         flashcards_data = get_flashcards_data(actividad_flashcard.id)
