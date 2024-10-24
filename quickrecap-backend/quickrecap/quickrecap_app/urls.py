@@ -24,7 +24,9 @@ urlpatterns = [
     path('activity/delete/<int:pk>', ActivityDeleteView.as_view(), name='activity-delete'),
     
     path('favorite/list', FavoritoListView.as_view(), name='favorite-list'),
-    path('favorite/create', FavoritoCreateView.as_view(), name='favorite-create'),
+    path('favorite/create', FavoritoCreateView.as_view(), name='favorite-create'),  
     
     path('rated/create', RatedCreateView.as_view(), name='favorite-create'),
+    
+    path('home/list', EstadisticasView.as_view(), name='home-list'),
 ]

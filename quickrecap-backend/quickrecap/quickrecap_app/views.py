@@ -33,6 +33,9 @@ class LoginView(generics.GenericAPIView):
         user = serializer.validated_data['user']
         refresh = RefreshToken.for_user(user)
         
+        actividades_completadas = Actividad.objects.filter(usuario=user.id, completado=True).count()
+        actividades_generadas = Actividad.objects.filter(usuario=user.id).count()
+        
         user_data = {
             'id': user.id,
             'profile_image': user.profile_image,
@@ -43,13 +46,30 @@ class LoginView(generics.GenericAPIView):
             'fecha_nacimiento': user.fecha_nacimiento,
             'email': user.email,
             'username': user.username,
+            'puntos': user.puntos,
+            'completadas': actividades_completadas,
+            'generadas': actividades_generadas
         }
         
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-            'user': user_data
+            'user': user_data,
         })
+
+class EstadisticasView(generics.ListAPIView):
+    def list(self, request, *args, **kwargs):
+        total_actividades = Actividad.objects.count()
+        total_archivos = File.objects.count()
+        total_usuarios = User.objects.count()
+        
+        data = {
+            'total_actividades': total_actividades,
+            'total_archivos': total_archivos,
+            'total_usuarios': total_usuarios,
+        }
+        
+        return Response(data)
 
 class LogoutView(generics.GenericAPIView):
     serializer_class = LogoutSerializer
@@ -128,17 +148,30 @@ class UserUpdatePointsView(generics.RetrieveUpdateAPIView):
         return User.objects.get(id=user_id)
     
     def update(self, request, *args, **kwargs):
+        actividad_id = request.data.get('actividad_id')
         partial = kwargs.pop('partial', False)
+        
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
+        
+        actividad = Actividad.objects.get(id=actividad_id)
+        actividad.veces_jugado = F('veces_jugado') + 1
+        actividad.save()
 
         if 'puntos' in request.data:
             new_points = request.data['puntos']
             instance.puntos = F('puntos') + new_points
             instance.save()
             instance.refresh_from_db()
+            
+            actividad = Actividad.objects.get(id=actividad_id)
+            actividad.veces_jugado = F('veces_jugado') + 1
+            actividad.save()
+            actividad.refresh_from_db()
+            
             serializer.data['puntos'] = instance.puntos
+            serializer.data['veces_jugado'] = actividad.veces_jugado
         else:
             self.perform_update(serializer)
         return Response(serializer.data)
@@ -311,7 +344,7 @@ class ActivityCreateView(generics.ListCreateAPIView):
 
 # -------- Crear Endpoint para retornar por tipo de actividad y por ID de actividad
 #backend-quickrecap.com/activity/search?id=90
-#backend-quickrecap.com/activity/search?tipo=Linkers
+#backend-quickrecap.com/activity/search?tipo=Linkers order by veces jugado desc
 
 class ActivitySearchByUserView(generics.ListAPIView):
     serializer_class = ActivityListSerializer
