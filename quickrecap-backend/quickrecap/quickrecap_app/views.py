@@ -216,6 +216,23 @@ def get_gaps_data(actividad_gaps_id):
         for gap_enunciado in gap_enunciados
     ]
     
+def get_linkers_data(actividad_flashcard_id):
+    linkers = Enunciado.objects.filter(actividad_id=actividad_flashcard_id)
+
+    # Agrupamos los linkers en grupos de 3
+    grouped_linkers = [linkers[i:i+3] for i in range(0, len(linkers), 3)]
+
+    # Creamos la estructura de datos deseada
+    return [
+        {
+            'linker_item': [
+                {'word': f.enunciado, 'definition': f.opcion_set.get(correcta=True).texto}
+                for f in group
+            ]
+        }
+        for group in grouped_linkers
+    ]
+    
 def create_flashcard_activity(pdf_text, numero_preguntas, id):
     questions_flashcard = generate_questions_flashcard(pdf_text, numero_preguntas)
     createFlashcard(questions_flashcard, id)
@@ -336,11 +353,12 @@ class ActivityCreateView(generics.ListCreateAPIView):
             actividad_gaps.save()
             actividad_flashcard.save()
             
-            #Guardado de actividad
-            #--------- Logica para guardar la actividad ---------
+            #Obtener los datos del linker creado
+            linkers_data = get_linkers_data(actividad_flashcard.id)
+            id_quiz = actividad_gaps.id
 
             #Actualizar response con la informacion del quiz
-            response_data['linkers'] = flashcards_data
+            response_data['linkers'] = linkers_data
         
         response_data['activity'] = {'id': id_quiz, 'nombre': nombre_actividad ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': tiempo_pregunta}
         return Response(response_data, status=status.HTTP_201_CREATED)
