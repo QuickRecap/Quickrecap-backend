@@ -363,9 +363,25 @@ class ActivityCreateView(generics.ListCreateAPIView):
         response_data['activity'] = {'id': id_quiz, 'nombre': nombre_actividad ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': tiempo_pregunta}
         return Response(response_data, status=status.HTTP_201_CREATED)
 
-# -------- Crear Endpoint para retornar por tipo de actividad y por ID de actividad
-#backend-quickrecap.com/activity/search?id=90
-#backend-quickrecap.com/activity/search?tipo=Linkers order by veces jugado desc
+class ActivitySearchView(generics.ListAPIView):
+    serializer_class = ActivityListSerializer
+    
+    def get_queryset(self):
+        queryset = Actividad.objects.all()
+        activity_id = self.request.query_params.get('id', None)
+        tipo = self.request.query_params.get('tipo', None)
+        
+        if activity_id is not None:
+            queryset = queryset.filter(id=activity_id)
+            
+        if tipo is not None:
+            if tipo == 'Todos' or tipo == 'todos':
+                queryset = queryset.order_by('-veces_jugado')
+                return queryset
+            else:
+                queryset = queryset.filter(tipo_actividad__iexact=tipo.lower()).order_by('-veces_jugado')
+            
+        return queryset
 
 class ActivitySearchByUserView(generics.ListAPIView):
     serializer_class = ActivityListSerializer
@@ -390,7 +406,7 @@ class ActivitySearchByUserView(generics.ListAPIView):
                 queryset = queryset
                 return queryset
             else:
-                queryset = queryset.filter(tipo_actividad=tipo)
+                queryset = queryset.filter(tipo_actividad__iexact=tipo.lower())
 
         return queryset
     
