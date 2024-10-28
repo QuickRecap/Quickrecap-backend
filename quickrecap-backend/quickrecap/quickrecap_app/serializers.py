@@ -101,9 +101,31 @@ class FileSerializer(serializers.ModelSerializer):
 
 #----------- ACTIVIDAD SERIALIZER --------- #
 class ActivityListSerializer(serializers.ModelSerializer):
+    favourite = serializers.SerializerMethodField()
+
     class Meta:
         model = Actividad
-        fields = '__all__'
+        fields = [
+            'id',
+            'tipo_actividad',
+            'tiempo_por_pregunta',
+            'numero_preguntas',
+            'veces_jugado',
+            'puntuacion_maxima',
+            'completado',
+            'privado',
+            'nombre',
+            'usuario',
+            'flashcard_id',
+            'favourite'
+        ]
+
+    def get_favourite(self, obj):
+        user_id = self.context.get('user_id')
+        return Favoritos.objects.filter(
+            user_id=user_id,
+            activity_id=obj.id
+        ).exists()
 
 class ActivityCreateSerializer(serializers.ModelSerializer):
     class Meta: 

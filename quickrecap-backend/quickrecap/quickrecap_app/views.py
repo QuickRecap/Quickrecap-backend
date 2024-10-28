@@ -388,27 +388,47 @@ class ActivitySearchByUserView(generics.ListAPIView):
 
     def get_queryset(self):
         user_id = self.kwargs['pk']
-        queryset = Actividad.objects.filter(usuario=user_id, flashcard_id__isnull=False)
-
         favorito = self.request.query_params.get('favorito', None)
-        search = self.request.query_params.get('search', None)
         tipo = self.request.query_params.get('tipo', None)
 
-        if favorito is not None:
-            favorito_bool = favorito.lower() == 'true'
-            queryset = queryset.filter(favorito=favorito_bool)
-        
-        if search is not None:
-            queryset = queryset.filter(Q(nombre__icontains=search))
-        
-        if tipo is not None:
-            if tipo == 'Todos':
-                queryset = queryset
-                return queryset
-            else:
-                queryset = queryset.filter(tipo_actividad__iexact=tipo.lower())
+        if favorito and favorito.lower() == 'true':
+            queryset = Actividad.objects.filter(
+                favoritos__user_id=user_id,
+                flashcard_id__isnull=False,
+            ).select_related('usuario').order_by('-veces_jugado')
+        else:
+            queryset = Actividad.objects.filter(
+                usuario_id=user_id,
+                flashcard_id__isnull=False
+            ).select_related('usuario').order_by('-veces_jugado')
 
-        return queryset
+        if tipo is not None and tipo != 'Todos':
+            queryset = queryset.filter(tipo_actividad=tipo).order_by('-veces_jugado')
+
+        return queryset.filter(flashcard_id__isnull=False).order_by('-veces_jugado')
+
+    def get_serializer_context(self):
+        """
+        Añadimos el user_id al contexto del serializer
+        """
+        context = super().get_serializer_context()
+        context['user_id'] = self.kwargs['pk']
+        return context
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        
+        if not queryset.exists():
+            return Response({
+                'message': 'No se encontraron actividades',
+                'activities': []
+            }, status=status.HTTP_200_OK)
+            
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'message': 'Actividades encontradas exitosamente',
+            'activities': serializer.data
+        }, status=status.HTTP_200_OK)
     
 class ActivityUpdateView(generics.RetrieveUpdateAPIView):
     queryset = Actividad.objects.all()
@@ -421,6 +441,7 @@ class ActivityUpdateView(generics.RetrieveUpdateAPIView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
+        print(request.data)
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
@@ -429,6 +450,82 @@ class ActivityUpdateView(generics.RetrieveUpdateAPIView):
             instance._prefetched_objects_cache = {}
             
         return Response(serializer.data)
+    
+class ActivityFavoriteView(generics.GenericAPIView):
+    queryset = Favoritos.objects.all()
+    
+    def post(self, request, pk):
+        try:
+            try:
+                actividad = Actividad.objects.get(id=pk)
+            except Actividad.DoesNotExist:
+                return Response({
+                    'error': 'Actividad no encontrada',
+                    'activity_id': pk
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            is_favorite = request.data.get('favorito', False)
+            user_id = request.data.get('user')
+            
+            # Verificar si el usuario existe
+            try:
+                usuario = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                return Response({
+                    'error': 'Usuario no encontrado',
+                    'user_id': user_id
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            if is_favorite:
+                try:
+                    # Añadir a favoritos si no existe
+                    favorito, created = Favoritos.objects.get_or_create(
+                        user=usuario,
+                        activity=actividad
+                    )
+                    mensaje = "Actividad añadida a favoritos" if created else "La actividad ya está en favoritos"
+                except Exception as e:
+                    return Response({
+                        'error': f'Error al crear favorito: {str(e)}',
+                        'details': {
+                            'user_id': user_id,
+                            'activity_id': pk
+                        }
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                try:
+                    # Eliminar de favoritos si existe
+                    deleted, _ = Favoritos.objects.filter(
+                        user=usuario,
+                        activity=actividad
+                    ).delete()
+                    mensaje = "Actividad eliminada de favoritos" if deleted else "La actividad no estaba en favoritos"
+                except Exception as e:
+                    print("Error al eliminar favorito:", str(e))
+                    return Response({
+                        'error': f'Error al eliminar favorito: {str(e)}',
+                        'details': {
+                            'user_id': user_id,
+                            'activity_id': pk
+                        }
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            
+            return Response({
+                'message': mensaje,
+                'favorito': is_favorite,
+                'activity_id': pk,
+                'user_id': user_id
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print("Error general:", str(e))
+            return Response({
+                'error': str(e),
+                'details': {
+                    'request_data': request.data,
+                    'pk': pk
+                }
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class ActivityDeleteView(generics.DestroyAPIView):
     queryset = Actividad.objects.all()
@@ -445,7 +542,7 @@ class ActivityDeleteView(generics.DestroyAPIView):
 # ---------- FAVORITOS ---------- #
 class FavoritoListView(generics.ListAPIView):
     serializer_class = FavoritoListSerializer
-
+    
     def get_queryset(self):
         queryset = Favoritos.objects.all()
 
@@ -461,7 +558,7 @@ class FavoritoListView(generics.ListAPIView):
                 return queryset
             else:
                 queryset = queryset.filter(activity__tipo_actividad=tipo)
-
+        
         return queryset
 
 class FavoritoCreateView(generics.ListCreateAPIView):
