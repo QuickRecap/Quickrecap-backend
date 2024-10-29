@@ -7,6 +7,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.exceptions import NotFound
+import time
+import os
+import requests
+from urllib.parse import urlparse
 
 from django.contrib.auth import authenticate
 from django.db.models import Q, F
@@ -176,31 +180,57 @@ class UserUpdatePointsView(generics.RetrieveUpdateAPIView):
             self.perform_update(serializer)
         return Response(serializer.data)
 
+
 # ---------- ACTIVITIES ---------- #
+def get_file_info(pdf_url):
+    """Get file information from URL"""
+    # Get filename from URL
+    filename = os.path.basename(urlparse(pdf_url).path)
+
+    # Download file temporarily to get size
+    response = requests.get(pdf_url, stream=True)
+    file_size = int(response.headers.get('content-length', 0))
+    file_size_mb = file_size / (1024 * 1024)  # Convert to MB
+
+    return filename, file_size_mb
+
+
 def get_flashcards_data(actividad_flashcard_id):
+    start_time = time.time()
     flashcards = Enunciado.objects.filter(actividad_id=actividad_flashcard_id)
-    return [
+    data = [
         {'word': f.enunciado, 'definition': f.opcion_set.get(correcta=True).texto}
         for f in flashcards
     ]
+    process_time = time.time() - start_time
+    print(f"Flashcards processing time: {process_time:.2f} seconds")
+    return data
+
 
 def get_quiz_data(actividad_quiz_id):
+    start_time = time.time()
     quiz = Actividad.objects.get(id=actividad_quiz_id)
     preguntas = Enunciado.objects.filter(actividad=quiz)
-    return [
+    data = [
         {
             'question': pregunta.enunciado,
             'alternatives': [opcion.texto for opcion in pregunta.opcion_set.all()],
-            'answer': [opcion.texto for opcion in pregunta.opcion_set.all()].index(pregunta.opcion_set.get(correcta=True).texto)
+            'answer': [opcion.texto for opcion in pregunta.opcion_set.all()].index(
+                pregunta.opcion_set.get(correcta=True).texto)
         }
         for pregunta in preguntas
     ]
+    process_time = time.time() - start_time
+    print(f"Quiz processing time: {process_time:.2f} seconds")
+    return data
+
 
 def get_gaps_data(actividad_gaps_id):
+    start_time = time.time()
     actividad = Actividad.objects.get(id=actividad_gaps_id)
     gap_enunciados = GapEnunciado.objects.filter(actividad=actividad)
-    
-    return [
+
+    data = [
         {
             'texto_completo': gap_enunciado.texto_completo,
             'texto_con_huecos': gap_enunciado.texto_con_huecos,
@@ -215,15 +245,16 @@ def get_gaps_data(actividad_gaps_id):
         }
         for gap_enunciado in gap_enunciados
     ]
-    
+    process_time = time.time() - start_time
+    print(f"Gaps processing time: {process_time:.2f} seconds")
+    return data
+
+
 def get_linkers_data(actividad_flashcard_id):
+    start_time = time.time()
     linkers = Enunciado.objects.filter(actividad_id=actividad_flashcard_id)
-
-    # Agrupamos los linkers en grupos de 3
-    grouped_linkers = [linkers[i:i+3] for i in range(0, len(linkers), 3)]
-
-    # Creamos la estructura de datos deseada
-    return [
+    grouped_linkers = [linkers[i:i + 3] for i in range(0, len(linkers), 3)]
+    data = [
         {
             'linker_item': [
                 {'word': f.enunciado, 'definition': f.opcion_set.get(correcta=True).texto}
@@ -232,35 +263,56 @@ def get_linkers_data(actividad_flashcard_id):
         }
         for group in grouped_linkers
     ]
-    
+    process_time = time.time() - start_time
+    print(f"Linkers processing time: {process_time:.2f} seconds")
+    return data
+
+
 def create_flashcard_activity(pdf_text, numero_preguntas, id):
+    start_time = time.time()
     questions_flashcard = generate_questions_flashcard(pdf_text, numero_preguntas)
     createFlashcard(questions_flashcard, id)
+    process_time = time.time() - start_time
+    print(f"Flashcard creation time: {process_time:.2f} seconds")
+
 
 class ActivityCreateView(generics.ListCreateAPIView):
     queryset = Actividad.objects.all()
     serializer_class = ActivityCreateSerializer
 
     def post(self, request):
-        #Inicializar Datos
+        total_start_time = time.time()
+
+        # Inicializar Datos
         data = request.data
         nombre_actividad = data.get('nombre')
         tipo_actividad = data.get('tipo_actividad').lower()
         numero_preguntas = data.get('numero_preguntas')
         tiempo_pregunta = data.get('tiempo_por_pregunta')
-        
-        #Obtener URL del PDF
+
+        # Obtener URL del PDF y su información
         pdf_url = request.data.get('pdf_url')
-        
-        #Actualizar numero de preguntas dependiendo de la actividad        
-        numero_preguntas = int(numero_preguntas) * 3 if tipo_actividad == 'linkers' else int(numero_preguntas)
-        
-        #Procesar PDF y convertir a JSON
+        filename, file_size_mb = get_file_info(pdf_url)
+        print(f"\n{'=' * 50}")
+        print(f"Processing activity: {nombre_actividad}")
+        print(f"File: {filename}")
+        print(f"File size: {file_size_mb:.2f} MB")
+        print(f"Activity type: {tipo_actividad}")
+        print(f"Number of questions: {numero_preguntas}")
+        print(f"{'=' * 50}\n")
+
+        # Procesar PDF y convertir a JSON
+        pdf_start_time = time.time()
         response = process_pdf_gemini(pdf_url)
         response_data = json.loads(response.content)
         pdf_text = response_data.get('pdf_text')
-        
-        # Crear la primera actividad según el tipo
+        pdf_process_time = time.time() - pdf_start_time
+        print(f"PDF processing time: {pdf_process_time:.2f} seconds")
+
+        # Actualizar numero de preguntas dependiendo de la actividad
+        numero_preguntas = int(numero_preguntas) * 3 if tipo_actividad == 'linkers' else int(numero_preguntas)
+
+        # Crear actividad base (Flashcards)
         flashcard_activity = {
             'tipo_actividad': 'Flashcards',
             'tiempo_por_pregunta': data.get('tiempo_por_pregunta'),
@@ -268,99 +320,90 @@ class ActivityCreateView(generics.ListCreateAPIView):
             'usuario': data.get('usuario'),
             'nombre': data.get('nombre'),
         }
-        
-        #Serializar los resultados
+
         serializer_flashcard = self.get_serializer(data=flashcard_activity)
         serializer_flashcard.is_valid(raise_exception=True)
         actividad_flashcard = serializer_flashcard.save()
-        
-        # Update flashcard_id for Flashcard activity
         actividad_flashcard.flashcard_id = actividad_flashcard.id
         actividad_flashcard.save()
-            
-        #Crear actividad de flashcard
+
         create_flashcard_activity(pdf_text, numero_preguntas, actividad_flashcard.id)
         flashcards_data = get_flashcards_data(actividad_flashcard.id)
-        
+
         id_quiz = actividad_flashcard.id
-        
-        #Actualizar response con la informacion de las flashcards
         response_data = {'flashcards': flashcards_data}
-        
-        if tipo_actividad.lower() == 'quiz':
-            #Hacer una copia de request.data
+
+        # Procesar actividad específica según el tipo
+        if tipo_actividad == 'quiz':
+            quiz_start_time = time.time()
             new_data = request.data.copy()
-            
-            # Añadir el parámetro 'flashcard_id' antes de serializar
             new_data['flashcard_id'] = actividad_flashcard.id
             actividad_flashcard.flashcard_id = None
 
-            # Crear la actividad de quiz
             serializer_quiz = self.get_serializer(data=new_data)
             serializer_quiz.is_valid(raise_exception=True)
             actividad_quiz = serializer_quiz.save()
             actividad_flashcard.save()
 
-            # Crear Quiz - 5.11seg
             questions_quiz = generate_questions_quiz(pdf_text, numero_preguntas)
             createQuiz(questions_quiz, actividad_quiz.id)
-            
-            #Obtener los datos del quiz creado
             quiz_data = get_quiz_data(actividad_quiz.id)
             id_quiz = actividad_quiz.id
-            
-            #Actualizar response con la informacion del quiz
             response_data['quiz'] = quiz_data
-        
-        if tipo_actividad.lower() == 'gaps':
-            #Hacer una copia de request.data
+
+            quiz_process_time = time.time() - quiz_start_time
+            print(f"Quiz creation time: {quiz_process_time:.2f} seconds")
+
+        elif tipo_actividad == 'gaps':
+            gaps_start_time = time.time()
             new_data = request.data.copy()
-            
-            # Añadir el parámetro 'flashcard_id' antes de serializar
             new_data['flashcard_id'] = actividad_flashcard.id
             actividad_flashcard.flashcard_id = None
-            
-            # Crear la actividad de gaps
+
             serializer_gaps = self.get_serializer(data=new_data)
             serializer_gaps.is_valid(raise_exception=True)
             actividad_gaps = serializer_gaps.save()
             actividad_gaps.save()
             actividad_flashcard.save()
-            
-            # Crear Gaps - #seg
+
             questions_quiz = generate_questions_gaps(pdf_text, numero_preguntas)
             createGaps(questions_quiz, actividad_gaps.id)
-            
-            #Obtener los datos del quiz creado
             quiz_data = get_gaps_data(actividad_gaps.id)
             id_quiz = actividad_gaps.id
-            
-            #Actualizar response con la informacion del quiz
             response_data['gaps'] = quiz_data
-        
-        if tipo_actividad.lower() == 'linkers':
-            #Hacer una copia de request.data
+
+            gaps_process_time = time.time() - gaps_start_time
+            print(f"Gaps creation time: {gaps_process_time:.2f} seconds")
+
+        elif tipo_actividad == 'linkers':
+            linkers_start_time = time.time()
             new_data = request.data.copy()
-                  
-            # Añadir el parámetro 'flashcard_id' antes de serializar
             new_data['flashcard_id'] = actividad_flashcard.id
             actividad_flashcard.flashcard_id = None
-            
-            # Crear la actividad de gaps
+
             serializer_gaps = self.get_serializer(data=new_data)
             serializer_gaps.is_valid(raise_exception=True)
             actividad_gaps = serializer_gaps.save()
             actividad_gaps.save()
             actividad_flashcard.save()
-            
-            #Obtener los datos del linker creado
+
             linkers_data = get_linkers_data(actividad_flashcard.id)
             id_quiz = actividad_gaps.id
-
-            #Actualizar response con la informacion del quiz
             response_data['linkers'] = linkers_data
-        
-        response_data['activity'] = {'id': id_quiz, 'nombre': nombre_actividad ,'numero_preguntas': numero_preguntas, 'tiempo_pregunta': tiempo_pregunta}
+
+            linkers_process_time = time.time() - linkers_start_time
+            print(f"Linkers creation time: {linkers_process_time:.2f} seconds")
+
+        total_process_time = time.time() - total_start_time
+        print(f"\nTotal processing time: {total_process_time:.2f} seconds")
+        print(f"{'=' * 50}\n")
+
+        response_data['activity'] = {
+            'id': id_quiz,
+            'nombre': nombre_actividad,
+            'numero_preguntas': numero_preguntas,
+            'tiempo_pregunta': tiempo_pregunta
+        }
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 class ActivitySearchView(generics.ListAPIView):
