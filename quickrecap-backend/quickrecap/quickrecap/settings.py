@@ -27,7 +27,7 @@ DEBUG = True
 
 AUTH_USER_MODEL = 'quickrecap_app.User'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '10.0.2.2']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
