@@ -13,7 +13,8 @@ urlpatterns = [
     path('user/list', UserGetView.as_view(), name='user-list'),
     path('user/update/<int:pk>', UserUpdateView.as_view(), name='edit-user'),
     path('user/addpoints/<int:pk>', UserUpdatePointsView.as_view(), name='user-points'),
-    
+    path('user/estadistics/<int:pk>', EstadisticasByUser.as_view(), name='user-estadistics'),
+
     path('file/search/<int:pk>', FileGetByUserView.as_view(), name='archivo-search'),
     path('file/create', FileCreateView.as_view(), name='archivo-create'),
     path('file/delete/<int:pk>', FileDeleteView.as_view(), name='archivo-delete'),

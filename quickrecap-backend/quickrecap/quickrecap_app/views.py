@@ -33,9 +33,6 @@ class LoginView(generics.GenericAPIView):
         user = serializer.validated_data['user']
         refresh = RefreshToken.for_user(user)
         
-        actividades_completadas = Actividad.objects.filter(usuario=user.id, completado=True).count()
-        actividades_generadas = Actividad.objects.filter(usuario=user.id).count()
-        
         user_data = {
             'id': user.id,
             'profile_image': user.profile_image,
@@ -46,9 +43,6 @@ class LoginView(generics.GenericAPIView):
             'fecha_nacimiento': user.fecha_nacimiento,
             'email': user.email,
             'username': user.username,
-            'puntos': user.puntos,
-            'completadas': actividades_completadas,
-            'generadas': actividades_generadas
         }
         
         return Response({
@@ -56,6 +50,21 @@ class LoginView(generics.GenericAPIView):
             'access': str(refresh.access_token),
             'user': user_data,
         })
+
+class EstadisticasByUser(generics.ListAPIView):
+    def list(self, request, *args, **kwargs):
+        user_id = self.kwargs['pk']
+        actividades_completadas = Actividad.objects.filter(usuario=user_id, completado=True).count()
+        actividades_generadas = Actividad.objects.filter(usuario=user_id).count()
+        user = User.objects.get(id=user_id)
+
+        data = {
+            'puntos': user.puntos,
+            'completadas': actividades_completadas,
+            'generadas': actividades_generadas
+        }
+
+        return Response(data)
 
 class EstadisticasView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
