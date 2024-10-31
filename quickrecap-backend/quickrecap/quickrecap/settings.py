@@ -79,23 +79,23 @@ WSGI_APPLICATION = 'quickrecap.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-   'default': {
-       'ENGINE': 'django.db.backends.sqlite3',
-       'NAME': BASE_DIR / 'db.sqlite3',
-   }
-}
-
 # DATABASES = {
-#      'default': {
-#          'ENGINE': 'django.db.backends.mysql',
-#          'HOST': '/cloudsql/tt-dev-001:us-central1:dev',
-#          'PORT' : '3306',
-#          'USER': 'root',
-#          'PASSWORD': 'mysql',
-#          'NAME': 'appdb',
-#      }
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
 # }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'quickrecap-db',
+        'USER': 'postgres',
+        'PASSWORD': 'admin',
+        'HOST': '/cloudsql/quickrecap:us-central1:quickrecap-bd',
+        'PORT': '5432'
+    }
+}
 
 
 # Password validation
