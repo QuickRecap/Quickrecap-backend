@@ -392,7 +392,7 @@ class ActivitySearchView(generics.ListAPIView):
             else:
                 queryset = queryset.filter(tipo_actividad__iexact=tipo.lower()).order_by('-veces_jugado')
             
-        return queryset
+        return queryset.order_by('-veces_jugado')
 
 class ActivitySearchByUserView(generics.ListAPIView):
     serializer_class = ActivityListSerializer
