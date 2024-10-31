@@ -143,3 +143,8 @@ class RatedListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rated
         fields = '__all__'
+        
+class HistorialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Historial
+        fields = '__all__'

@@ -641,3 +641,17 @@ class FileCreateView(generics.ListCreateAPIView):
 class FileDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = File.objects.all()
     serializer_class = FileSerializer
+    
+# ---------- HISTORIAL ---------- #
+class HistorialListView(generics.ListAPIView):
+    serializer_class = HistorialSerializer
+    
+    def get_queryset(self):
+        queryset = Historial.objects.filter(user=self.request.user)
+        
+        activity_id = self.request.query_params.get('activity', None)
+        
+        if activity_id:
+            queryset = queryset.filter(activity_id=activity_id).order_by('-fecha')
+            
+        return queryset.order_by('-fecha')

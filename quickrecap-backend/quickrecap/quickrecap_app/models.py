@@ -68,6 +68,14 @@ class Rated(models.Model):
     rate = models.IntegerField()
     commentary = models.TextField(null=True, blank=True)
 
+class Historial(models.Model):
+    id = models.AutoField(primary_key=True)
+    activity = models.ForeignKey(Actividad, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    numero_preguntas = models.IntegerField()
+    respuestas_correctas = models.IntegerField()
+    fecha = models.DateTimeField(auto_now_add=True)
+
 class Enunciado(models.Model):
     id = models.AutoField(primary_key=True)
     actividad = models.ForeignKey(Actividad, on_delete=models.CASCADE)
