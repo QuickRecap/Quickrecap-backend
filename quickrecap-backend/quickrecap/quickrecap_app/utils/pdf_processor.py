@@ -1,5 +1,5 @@
 import requests
-import fitz
+import PyPDF2 as ac
 import os
 import time
 import json
@@ -7,12 +7,12 @@ import json
 from django.http import JsonResponse
 
 def pdf_to_text(pdf_path):
-    pdf_document = fitz.open(pdf_path)
-    text = ""
-    for page_num in range(len(pdf_document)):
-        page = pdf_document.load_page(page_num)
-        text += page.get_text()
-    pdf_document.close()
+    with open(pdf_path, 'rb') as file:
+        pdf_reader = ac.PdfFileReader(file)
+        text = ''
+        for page_num in range(pdf_reader.numPages):
+            page = pdf_reader.getPage(page_num)
+            text += page.extractText()
     return text
 
 def process_pdf_gemini(url):
