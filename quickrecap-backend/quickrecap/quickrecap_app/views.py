@@ -387,12 +387,12 @@ class ActivitySearchView(generics.ListAPIView):
             
         if tipo is not None:
             if tipo == 'Todos' or tipo == 'todos':
-                queryset = queryset.order_by('-veces_jugado')
+                queryset = queryset.order_by('-veces_jugado').filter(privado=False)
                 return queryset
             else:
-                queryset = queryset.filter(tipo_actividad__iexact=tipo.lower()).order_by('-veces_jugado')
+                queryset = queryset.filter(tipo_actividad__iexact=tipo.lower(), privado=False).order_by('-veces_jugado')
             
-        return queryset.order_by('-veces_jugado')
+        return queryset.order_by('-veces_jugado').filter(privado=False)
 
 class ActivitySearchByUserView(generics.ListAPIView):
     serializer_class = ActivityListSerializer
