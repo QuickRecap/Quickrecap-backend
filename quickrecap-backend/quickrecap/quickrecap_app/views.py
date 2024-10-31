@@ -377,6 +377,45 @@ class ActivitySearchView(generics.ListAPIView):
             context['user_id'] = user_id
         return context
     
+    def get_activity_type_data(self, activity):
+        activity_type = activity.tipo_actividad.lower()
+        flashcard_id = activity.flashcard_id
+
+        if flashcard_id is not None:
+            response_data = {
+                'flashcards': get_flashcards_data(flashcard_id)
+            }
+            
+            if activity_type == 'quiz':
+                response_data['quiz'] = get_quiz_data(activity.id)
+            elif activity_type == 'gaps':
+                response_data['gaps'] = get_gaps_data(activity.id)
+            elif activity_type == 'linkers':
+                response_data['linkers'] = get_linkers_data(activity.id)
+            
+            return response_data
+        else:
+            return {'flashcards': get_flashcards_data(activity.id)}
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        
+        # Si hay un ID en los parámetros, devolvemos el formato especial
+        activity_id = self.request.query_params.get('id', None)
+        if activity_id is not None:
+            activity = queryset.first()
+            if activity:
+                activity_data = self.get_serializer(activity).data
+                type_specific_data = self.get_activity_type_data(activity)
+                response_data = {
+                    'actividad': activity_data,
+                    **type_specific_data
+                }
+                return Response(response_data)
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
     def get_queryset(self):
         queryset = Actividad.objects.all()
         activity_id = self.request.query_params.get('id', None)
