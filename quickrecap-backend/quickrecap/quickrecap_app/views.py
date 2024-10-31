@@ -375,6 +375,13 @@ class ActivityCreateView(generics.ListCreateAPIView):
 class ActivitySearchView(generics.ListAPIView):
     serializer_class = ActivityListSerializer
     
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        user_id = self.request.query_params.get('user_id', None)
+        if user_id is not None:
+            context['user_id'] = user_id
+        return context
+    
     def get_queryset(self):
         queryset = Actividad.objects.all()
         activity_id = self.request.query_params.get('id', None)
