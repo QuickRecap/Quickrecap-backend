@@ -7,13 +7,16 @@ import json
 from django.http import JsonResponse
 
 def pdf_to_text(pdf_path):
-    with open(pdf_path, 'rb') as file:
-        pdf_reader = ac.PdfFileReader(file)
-        text = ''
-        for page_num in range(pdf_reader.numPages):
-            page = pdf_reader.getPage(page_num)
-            text += page.extractText()
-    return text
+    try:
+        with open(pdf_path, 'rb') as file:
+            pdf_reader = ac.PdfReader(file)
+            text = ''
+            for page in pdf_reader.pages:
+                text += page.extract_text()
+        return text
+    except Exception as e:
+        print(f"Error extracting text: {e}")
+        return ''
 
 def process_pdf_gemini(url):
         try:
