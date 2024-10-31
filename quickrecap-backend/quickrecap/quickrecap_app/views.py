@@ -174,11 +174,6 @@ class UserUpdatePointsView(generics.RetrieveUpdateAPIView):
             instance.save()
             instance.refresh_from_db()
             
-            actividad = Actividad.objects.get(id=actividad_id)
-            actividad.veces_jugado = F('veces_jugado') + 1
-            actividad.save()
-            actividad.refresh_from_db()
-            
             serializer.data['puntos'] = instance.puntos
             serializer.data['veces_jugado'] = actividad.veces_jugado
         else:
