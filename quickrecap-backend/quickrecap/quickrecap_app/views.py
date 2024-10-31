@@ -1,4 +1,5 @@
 import json
+import re
 
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, permissions
@@ -252,6 +253,11 @@ class ActivityCreateView(generics.ListCreateAPIView):
         tipo_actividad = data.get('tipo_actividad').lower()
         numero_preguntas = data.get('numero_preguntas')
         tiempo_pregunta = data.get('tiempo_por_pregunta')
+        nombre = data.get('nombre').lower()
+        
+        #Si el nombre contiene caracteres especiales
+        if not re.match(r'^[a-záéíóúñ\s]+$', nombre):
+            return JsonResponse({'error': 'El nombre de la actividad contiene caracteres especiales'}, status=400)
         
         #Obtener URL del PDF
         pdf_url = request.data.get('pdf_url')
