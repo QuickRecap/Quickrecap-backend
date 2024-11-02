@@ -153,8 +153,6 @@ class UserUpdatePointsView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserUpdatePointsSerializer
     
-    #---------- Manejar POST a la tabla Historial ----------
-    
     def get_object(self):
         user_id = self.kwargs['pk']
         return User.objects.get(id=user_id)
@@ -164,7 +162,7 @@ class UserUpdatePointsView(generics.RetrieveUpdateAPIView):
         numero_preguntas = request.data.get('numero_preguntas', 0)
         respuestas_correctas = request.data.get('respuestas_correctas', 0)
         user_id = request.data.get('user_id')
-        
+
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
@@ -443,12 +441,12 @@ class ActivitySearchView(generics.ListAPIView):
             
         if tipo is not None:
             if tipo == 'Todos' or tipo == 'todos':
-                queryset = queryset.order_by('-veces_jugado').filter(privado=False)
+                queryset = queryset.order_by('-veces_jugado').filter(privado=False, flashcard_id__isnull=False)
                 return queryset
             else:
                 queryset = queryset.filter(tipo_actividad__iexact=tipo.lower(), privado=False).order_by('-veces_jugado')
             
-        return queryset.order_by('-veces_jugado').filter(privado=False)
+        return queryset.order_by('-veces_jugado').filter(privado=False, flashcard_id__isnull=False)
 
 class ActivitySearchByUserView(generics.ListAPIView):
     serializer_class = ActivityListSerializer
