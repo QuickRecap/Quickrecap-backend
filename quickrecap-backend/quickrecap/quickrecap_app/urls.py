@@ -32,4 +32,7 @@ urlpatterns = [
     path('rated/create', RatedCreateView.as_view(), name='favorite-create'),
     
     path('home/list', EstadisticasView.as_view(), name='home-list'),
+    
+    path('historial/list/<int:pk>', HistorialListView.as_view(), name='historial-list'),
+    path('historial/create', HistorialCreateView.as_view(), name='historial-create'),
 ]

@@ -153,14 +153,19 @@ class UserUpdatePointsView(generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserUpdatePointsSerializer
     
+    #---------- Manejar POST a la tabla Historial ----------
+    
     def get_object(self):
         user_id = self.kwargs['pk']
         return User.objects.get(id=user_id)
     
     def update(self, request, *args, **kwargs):
         actividad_id = request.data.get('actividad_id')
-        partial = kwargs.pop('partial', False)
+        numero_preguntas = request.data.get('numero_preguntas', 0)
+        respuestas_correctas = request.data.get('respuestas_correctas', 0)
+        user_id = request.data.get('user_id')
         
+        partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
@@ -168,6 +173,13 @@ class UserUpdatePointsView(generics.RetrieveUpdateAPIView):
         actividad = Actividad.objects.get(id=actividad_id)
         actividad.veces_jugado = F('veces_jugado') + 1
         actividad.save()
+        
+        Historial.objects.create(
+            activity=actividad,
+            user=user_id,
+            numero_preguntas=numero_preguntas,
+            respuestas_correctas=respuestas_correctas
+        )
 
         if 'puntos' in request.data:
             new_points = request.data['puntos']
@@ -405,9 +417,8 @@ class ActivitySearchView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        
-        # Si hay un ID en los parámetros, devolvemos el formato especial
         activity_id = self.request.query_params.get('id', None)
+        
         if activity_id is not None:
             activity = queryset.first()
             if activity:
@@ -644,14 +655,13 @@ class FileDeleteView(generics.RetrieveUpdateDestroyAPIView):
     
 # ---------- HISTORIAL ---------- #
 class HistorialListView(generics.ListAPIView):
-    serializer_class = HistorialSerializer
+    serializer_class = HistorialListSerializer
     
     def get_queryset(self):
-        queryset = Historial.objects.filter(user=self.request.user)
-        
-        activity_id = self.request.query_params.get('activity', None)
-        
-        if activity_id:
-            queryset = queryset.filter(activity_id=activity_id).order_by('-fecha')
-            
-        return queryset.order_by('-fecha')
+        user_id = self.kwargs['pk']
+        queryset = Historial.objects.select_related('activity').filter(user=user_id).order_by('-fecha')
+        return queryset
+    
+class HistorialCreateView(generics.ListCreateAPIView):
+    queryset = Historial.objects.all()
+    serializer_class = HistorialCreateSerializer
