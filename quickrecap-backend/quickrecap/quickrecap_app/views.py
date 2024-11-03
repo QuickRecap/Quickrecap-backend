@@ -55,8 +55,8 @@ class LoginView(generics.GenericAPIView):
 class EstadisticasByUser(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         user_id = self.kwargs['pk']
-        actividades_completadas = Actividad.objects.filter(usuario=user_id, completado=True).count()
-        actividades_generadas = Historial.objects.filter(usuario=user_id).count()
+        actividades_completadas = Historial.objects.filter(usuario=user_id).count()
+        actividades_generadas = Actividad.objects.filter(usuario=user_id).count()
         user = User.objects.get(id=user_id)
 
         data = {
