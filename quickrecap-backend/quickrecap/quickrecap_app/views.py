@@ -267,10 +267,6 @@ class ActivityCreateView(generics.ListCreateAPIView):
         tiempo_pregunta = data.get('tiempo_por_pregunta')
         nombre = data.get('nombre').lower()
         
-        #Si el nombre contiene caracteres especiales
-        if not re.match(r'^[a-záéíóúñ\s]+$', nombre):
-            return JsonResponse({'error': 'El nombre de la actividad contiene caracteres especiales'}, status=400)
-        
         #Obtener URL del PDF
         pdf_url = request.data.get('pdf_url')
         
