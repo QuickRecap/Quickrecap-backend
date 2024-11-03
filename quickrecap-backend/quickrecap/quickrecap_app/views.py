@@ -162,6 +162,8 @@ class UserUpdatePointsView(generics.RetrieveUpdateAPIView):
         numero_preguntas = request.data.get('numero_preguntas', 0)
         respuestas_correctas = request.data.get('respuestas_correctas', 0)
         user_id = self.kwargs['pk']
+        
+        user = User.objects.get(id=user_id)
 
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -174,7 +176,7 @@ class UserUpdatePointsView(generics.RetrieveUpdateAPIView):
         
         Historial.objects.create(
             activity=actividad,
-            user=user_id,
+            user=user,
             numero_preguntas=numero_preguntas,
             respuestas_correctas=respuestas_correctas
         )
