@@ -342,14 +342,14 @@ class ActivityCreateView(generics.ListCreateAPIView):
             new_data['flashcard_id'] = actividad_flashcard.id
             actividad_flashcard.flashcard_id = None
             
-            # Crear la actividad de gaps
+            #Crear la actividad de gaps
             serializer_gaps = self.get_serializer(data=new_data)
             serializer_gaps.is_valid(raise_exception=True)
             actividad_gaps = serializer_gaps.save()
             actividad_gaps.save()
             actividad_flashcard.save()
             
-            # Crear Gaps - #seg
+            #Crear Gaps - 5seg
             questions_quiz = generate_questions_gaps(pdf_text, numero_preguntas)
             createGaps(questions_quiz, actividad_gaps.id)
             
@@ -368,16 +368,16 @@ class ActivityCreateView(generics.ListCreateAPIView):
             new_data['flashcard_id'] = actividad_flashcard.id
             actividad_flashcard.flashcard_id = None
             
-            # Crear la actividad de gaps
-            serializer_gaps = self.get_serializer(data=new_data)
-            serializer_gaps.is_valid(raise_exception=True)
-            actividad_gaps = serializer_gaps.save()
-            actividad_gaps.save()
+            # Crear la actividad de linkers
+            serializer_linkers = self.get_serializer(data=new_data)
+            serializer_linkers.is_valid(raise_exception=True)
+            actividad_linkers = serializer_linkers.save()
+            actividad_linkers.save()
             actividad_flashcard.save()
             
             #Obtener los datos del linker creado
             linkers_data = get_linkers_data(actividad_flashcard.id)
-            id_quiz = actividad_gaps.id
+            id_quiz = actividad_linkers.id
 
             #Actualizar response con la informacion del quiz
             response_data['linkers'] = linkers_data
@@ -409,7 +409,7 @@ class ActivitySearchView(generics.ListAPIView):
             elif activity_type == 'gaps':
                 response_data['gaps'] = get_gaps_data(activity.id)
             elif activity_type == 'linkers':
-                response_data['linkers'] = get_linkers_data(activity.id)
+                response_data['linkers'] = get_linkers_data(flashcard_id)
             
             return response_data
         else:
