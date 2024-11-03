@@ -147,10 +147,11 @@ class RatedListSerializer(serializers.ModelSerializer):
 #----------- HISTORIAL SERIALIZER --------- #  
 class HistorialListSerializer(serializers.ModelSerializer):
     nombre_actividad = serializers.CharField(source='activity.nombre')
+    tipo_actividad = serializers.CharField(source='activity.tipo_actividad')
     
     class Meta:
         model = Historial
-        fields = ['id', 'nombre_actividad', 'numero_preguntas', 'respuestas_correctas', 
+        fields = ['id', 'nombre_actividad', 'tipo_actividad', 'numero_preguntas', 'respuestas_correctas', 
                  'fecha', 'activity', 'user']
 
 #----------- HISTORIAL SERIALIZER --------- #  
