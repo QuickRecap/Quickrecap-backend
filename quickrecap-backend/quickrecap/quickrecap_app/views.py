@@ -161,7 +161,7 @@ class UserUpdatePointsView(generics.RetrieveUpdateAPIView):
         actividad_id = request.data.get('actividad_id')
         numero_preguntas = request.data.get('numero_preguntas', 0)
         respuestas_correctas = request.data.get('respuestas_correctas', 0)
-        user_id = request.data.get('user_id')
+        user_id = self.kwargs['pk']
 
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -592,7 +592,7 @@ class ActivityFavoriteView(generics.GenericAPIView):
                 }
             }, status=status.HTTP_400_BAD_REQUEST)
 
-class ActivityDeleteView(generics.DestroyAPIView):
+class ActivityDeleteView(generics.RetrieveDestroyAPIView):
     queryset = Actividad.objects.all()
     serializer_class = ActivityListSerializer
 
