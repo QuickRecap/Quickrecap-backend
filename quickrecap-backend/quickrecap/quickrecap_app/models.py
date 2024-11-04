@@ -50,20 +50,31 @@ class Actividad(models.Model):
     numero_preguntas = models.IntegerField()
     veces_jugado = models.IntegerField(default=0)
     puntuacion_maxima = models.IntegerField(default=0)
-    favorito = models.BooleanField(default=False)
     completado = models.BooleanField(default=False)
     privado = models.BooleanField(default=False)
-    rated = models.BooleanField(default=False)
     nombre = models.CharField(max_length=100)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     flashcard_id = models.IntegerField(null=True, blank=True)
 
-class Comments(models.Model):
+class Favoritos(models.Model):
     id = models.AutoField(primary_key=True)
-    actividad_id = models.ForeignKey(Actividad, on_delete=models.CASCADE)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    comentario = models.TextField(null=True, blank=True)
-    calificacion = models.IntegerField()
+    activity = models.ForeignKey(Actividad, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+class Rated(models.Model):
+    id = models.AutoField(primary_key=True)
+    activity = models.ForeignKey(Actividad, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rate = models.IntegerField()
+    commentary = models.TextField(null=True, blank=True)
+
+class Historial(models.Model):
+    id = models.AutoField(primary_key=True)
+    activity = models.ForeignKey(Actividad, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    numero_preguntas = models.IntegerField()
+    respuestas_correctas = models.IntegerField()
+    fecha = models.DateTimeField(auto_now_add=True)
 
 class Enunciado(models.Model):
     id = models.AutoField(primary_key=True)
@@ -82,6 +93,7 @@ class GapEnunciado(models.Model):
     actividad = models.ForeignKey(Actividad, on_delete=models.CASCADE)
     texto_completo = models.TextField()
     texto_con_huecos = models.TextField()
+    alternativas_incorrectas = models.TextField()
 
 class GapRespuesta(models.Model):
     id = models.AutoField(primary_key=True)

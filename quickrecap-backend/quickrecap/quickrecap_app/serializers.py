@@ -101,17 +101,61 @@ class FileSerializer(serializers.ModelSerializer):
 
 #----------- ACTIVIDAD SERIALIZER --------- #
 class ActivityListSerializer(serializers.ModelSerializer):
+    favourite = serializers.SerializerMethodField()
+
     class Meta:
         model = Actividad
-        fields = '__all__'
+        fields = [
+            'id',
+            'tipo_actividad',
+            'tiempo_por_pregunta',
+            'numero_preguntas',
+            'veces_jugado',
+            'puntuacion_maxima',
+            'completado',
+            'privado',
+            'nombre',
+            'usuario',
+            'flashcard_id',
+            'favourite'
+        ]
+
+    def get_favourite(self, obj):
+        user_id = self.context.get('user_id')
+        return Favoritos.objects.filter(
+            user_id=user_id,
+            activity_id=obj.id
+        ).exists()
 
 class ActivityCreateSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Actividad
         fields = ['tipo_actividad', 'tiempo_por_pregunta', 'numero_preguntas', 'nombre', 'usuario', 'flashcard_id']
 
-#----------- COMMENTS SERIALIZER --------- #
-class CommentsListSerializer(serializers.ModelSerializer):
+#----------- FAVORITOS SERIALIZER --------- #
+class FavoritoListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Comments
+        model = Favoritos
+        fields = '__all__'
+        
+#----------- RATED SERIALIZER --------- #
+class RatedListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rated
+        fields = '__all__'
+
+#----------- HISTORIAL SERIALIZER --------- #  
+class HistorialListSerializer(serializers.ModelSerializer):
+    nombre_actividad = serializers.CharField(source='activity.nombre')
+    tipo_actividad = serializers.CharField(source='activity.tipo_actividad')
+    
+    class Meta:
+        model = Historial
+        fields = ['id', 'nombre_actividad', 'tipo_actividad', 'numero_preguntas', 'respuestas_correctas', 
+                 'fecha', 'activity', 'user']
+
+#----------- HISTORIAL SERIALIZER --------- #  
+class HistorialCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Historial
         fields = '__all__'
