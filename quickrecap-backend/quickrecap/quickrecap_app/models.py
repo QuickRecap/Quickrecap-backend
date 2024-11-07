@@ -84,7 +84,7 @@ class Enunciado(models.Model):
 class Opcion(models.Model):
     id = models.AutoField(primary_key=True)
     enun_id = models.ForeignKey(Enunciado, on_delete=models.CASCADE)
-    texto = models.CharField(max_length=255)
+    texto = models.TextField()
     correcta = models.BooleanField(default=False)
     
 # -------------- GAPS ACTIVITY -------------- #

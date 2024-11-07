@@ -7,7 +7,7 @@ genai.configure(api_key=GOOGLE_API_KEY)
 #-------------- FLASHCARDS --------------#
 def generate_questions_flashcard(text, numero_preguntas):
     print("Generating Flashcards..")
-    prompt = f"""Utiliza el siguiente texto para generar {numero_preguntas} definiciones (termino + definicion) en el siguiente formato JSON:
+    prompt = f"""Utiliza el siguiente texto para generar {numero_preguntas} definiciones (termino + definicion) en el siguiente formato JSON (todas las preguntas deben ser formuladas en español, en caso el texto venga en otro idioma se debera traducir con precision y exactitud al idioma español):
        {{
          "flashcard": [
            {{
@@ -37,7 +37,7 @@ def generate_questions_flashcard(text, numero_preguntas):
 #-------------- QUIZ --------------#
 def generate_questions_quiz(text, numero_preguntas):
     print("Generating Quiz..")
-    prompt = f"""Utiliza el siguiente texto para generar {numero_preguntas} preguntas de opción múltiple en el siguiente formato JSON:
+    prompt = f"""Utiliza el siguiente texto para generar {numero_preguntas} preguntas de opción múltiple en el siguiente formato JSON (todas las preguntas deben ser formuladas en español, en caso el texto venga en otro idioma se debera traducir con precision y exactitud al idioma español):
        {{
          "questions": [
            {{
@@ -75,6 +75,7 @@ def generate_questions_gaps(text, numero_preguntas):
 4. Cada respuesta correcta debe ser UNA SOLA PALABRA, sin palabras compuestas.
 5. Usa el símbolo '&' para representar los huecos en el texto.
 6. Ninguna respuesta puede repetirse con otra previamente asignada.
+7. Todas las preguntas deben ser formuladas en español, en caso el texto venga en otro idioma se debera traducir con precision y exactitud al idioma español.
 
 Formato JSON requerido:
 
