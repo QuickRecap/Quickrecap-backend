@@ -2,6 +2,7 @@ import json
 import re
 
 from django.shortcuts import get_object_or_404
+from pydantic import ValidationError
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -265,13 +266,17 @@ class ActivityCreateView(generics.ListCreateAPIView):
         tipo_actividad = data.get('tipo_actividad').lower()
         numero_preguntas = data.get('numero_preguntas')
         tiempo_pregunta = data.get('tiempo_por_pregunta')
-        nombre = data.get('nombre').lower()
+        usuario = data.get('usuario')
         
         #Obtener URL del PDF
         pdf_url = request.data.get('pdf_url')
         
         #Actualizar numero de preguntas dependiendo de la actividad        
         numero_preguntas = int(numero_preguntas) * 3 if tipo_actividad == 'linkers' else int(numero_preguntas)
+        
+        #Validar si ese nombre ya existe en otra Actividad
+        if Actividad.objects.filter(nombre__iexact=nombre_actividad, usuario=usuario).exists():
+            return Response({'Este nombre ya esta asignado a una actividad'}, status=status.HTTP_400_BAD_REQUEST)
         
         #Procesar PDF y convertir a JSON
         response = process_pdf_gemini(pdf_url)
