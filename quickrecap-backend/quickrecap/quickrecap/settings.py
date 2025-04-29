@@ -88,12 +88,8 @@ WSGI_APPLICATION = 'quickrecap.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'quickrecap-db',
-        'USER': 'postgres',
-        'PASSWORD': 'admin',
-        'HOST': '/cloudsql/quickrecap:us-central1:quickrecap-bd',
-        'PORT': '5432'
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

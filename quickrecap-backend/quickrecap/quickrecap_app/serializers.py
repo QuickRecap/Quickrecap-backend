@@ -119,6 +119,7 @@ class ActivityListSerializer(serializers.ModelSerializer):
             'flashcard_id',
             'favourite'
         ]
+        depth=1
 
     def get_favourite(self, obj):
         user_id = self.context.get('user_id')
@@ -153,6 +154,7 @@ class HistorialListSerializer(serializers.ModelSerializer):
         model = Historial
         fields = ['id', 'nombre_actividad', 'tipo_actividad', 'numero_preguntas', 'respuestas_correctas', 
                  'fecha', 'activity', 'user']
+        depth=1
 
 #----------- HISTORIAL SERIALIZER --------- #  
 class HistorialCreateSerializer(serializers.ModelSerializer):
